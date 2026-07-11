@@ -1,0 +1,71 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h1>All posts</h1>
+    {% if user.is_authenticated %}
+        <div class="new-post">
+            <h2>New post</h2>
+            <form action="{% url 'new_post' %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" row="4" cols="100"></textarea>
+                <br>
+                <input type="submit" value="Post" class="btn btn-primary">
+            </form>
+        </div>
+    {% endif %}
+
+    <div class="all_posts">
+        {% for post in posts_in_page %}
+            <div class="row post">
+                <div class="col">
+
+                <!-- Edit button (only for owner of post) -->
+                <div style="position: absolute;top: 0;right: 0;">
+                    {% if request.user == post.user %}
+                        <button class="edit-btn btn btn-outline-secondary">Edit</button>
+                        <button class="save-btn btn btn-outline-secondary" style="display: none;">Save</button>
+                    {% endif %}
+                </div>
+
+                <h5 class="username"><a href="{% url 'profile' post.user.id %}">@{{ post.user }}</a></h5>
+                <h6 class="content">{{ post.content }}</h6>
+                <!-- Like button -->
+                <p class="date">{{ post.date }}</p>
+                <p class="like">
+                    {% if user.is_authenticated %}
+                    <button type="submit" class="like-btn btn p-0
+                        {% if post.is_liked %}text-danger
+                        {% else %}text-outline-danger
+                        {% endif %}">
+                        {% if post.is_liked %}<span style="color:red">&#9829</span>
+                        {% else %}&#9825
+                        {% endif %}
+                    </button>
+                    {% endif %}
+                    <span style="color:grey;font-size: smaller">{{ post.like.all.count }}</span>
+                </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination d-flex justify-content-center">
+            {% if posts_in_page.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ posts_in_page.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            {% if posts_in_page.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ posts_in_page.next_page_number }}">Next</a></li>
+            {% endif %}
+        </ul>
+      </nav>
+{% endblock %}
+
+{% block script %}
+    <script>
+    // Pass the CSRF token to JavaScript
+    const csrftoken = '{{ csrf_token }}';
+    </script>
+    <script src="{% static 'network/edit_like.js' %}"></script>
+{% endblock %}
