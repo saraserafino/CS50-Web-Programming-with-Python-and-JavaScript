@@ -28,4 +28,4 @@ Students are required to build a web application of their own, whose nature is u
 > Work in progress...
 
 > [!WARNING]
-> If you are taking the course, take into consideration [CS50's Academic Honesty rules](https://cs50.harvard.edu/web/honesty/#policy) before reading these files. This repository is merely intended to show the Web Programming skills I acquired to potential recruiters.
+> If you are taking the course, take into consideration [CS50's Academic Honesty rules](https://cs50.harvard.edu/web/honesty/#policy) before reading these files. This repository is merely intended to show to potential recruiters the Web Programming skills I acquired.
