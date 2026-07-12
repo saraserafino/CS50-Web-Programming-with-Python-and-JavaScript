@@ -4,10 +4,24 @@
     <h1>Following</h1>
     <div class="all_posts">
         {% for post in posts_in_page %}
-            <div class="row post">
+            <div class="row post" data-post-id="{{ post.id }}">
+                <div class="col">
+
+                <!-- Edit button (only for owner of post) -->
+                <div class="edit-save">
+                    {% if request.user == post.user %}
+                        <button class="edit-btn btn btn-outline-secondary">Edit</button>
+                        <button class="save-btn btn btn-outline-secondary">Save</button>
+                    {% endif %}
+                </div>
+
                 <h5 class="username"><a href="{% url 'profile' post.user.id %}">@{{ post.user }}</a></h5>
                 <h6 class="content">{{ post.content }}</h6>
                 <p class="date">{{ post.date }}</p>
+
+                <!-- Like button -->
+                
+                </div>
             </div>
         {% endfor %}
     </div>

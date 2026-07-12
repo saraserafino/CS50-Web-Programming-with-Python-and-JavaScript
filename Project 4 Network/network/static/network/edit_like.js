@@ -13,19 +13,20 @@ document.addEventListener('DOMContentLoaded', function() {
             contentDiv.innerHTML = '';
             contentDiv.appendChild(textarea);
 
-            // Show save button and hide edit button
+            // Hide edit button and show save button
             this.style.display = 'none';
             postDiv.querySelector('.save-btn').style.display = 'inline-block';
 
-            // Save button click handler
+            // Save
             postDiv.querySelector('.save-btn').addEventListener('click', function() {
                 const newContent = textarea.value;
                 const postId = postDiv.dataset.postId;
 
-                // Send AJAX request to save the edit
+                // Send AJAX request to save
                 fetch(`/edit_post/${postId}`, {
                     method: 'POST',
                     headers: {
+// With this attribute, form data is encoded into a string of key-value pairs where key-value pairs are separated by & and keys and values are separated by = (ex. name=Sara&age=27)
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-CSRFToken': csrftoken
                     },
@@ -55,21 +56,34 @@ document.addEventListener('DOMContentLoaded', function() {
             const postDiv = this.closest('.post');
             const postId = postDiv.dataset.postId;
             const likeCountSpan = postDiv.querySelector('.like-count');
+            const isLiked = this.classList.contains('text-danger');
 
-            fetch(`/toggle_like/${postId}`, {
+            fetch(`/like/${postId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
-                }
+                },
+                body: JSON.stringify(`action=${isLiked ? 'unlike' : 'like'}`)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update like count
                     likeCountSpan.textContent = data.like_count;
-                    this.textContent = data.liked ? 'Unlike' : 'Like';
-                    this.className = `btn btn-sm ${data.liked ? 'btn-danger' : 'btn-outline-danger'}`;
+                    // Update button icon and state
+                    if (data.liked) {
+                        this.innerHTML = '<span style="color:red">&#9829;</span>';
+                        this.classList.add('text-danger');
+                        this.classList.remove('text-outline-danger');
+                        this.dataset.liked = 'true';
                     } else {
+                        this.innerHTML = '&#9825;';
+                        this.classList.add('text-outline-danger');
+                        this.classList.remove('text-danger');
+                        this.dataset.liked = 'false';
+                    }
+                } else {
                     alert('Error: ' + (data.error || 'Unknown error'));
                 }
             })

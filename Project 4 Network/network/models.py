@@ -21,8 +21,8 @@ class Follow(models.Model):
         return f"{self.user} is following {self.user_followed}"
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="like")
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="like")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_likes")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
     created_at = models.DateTimeField(auto_now_add = True)
 
     class Meta: # Sets of field names that, taken together, must be unique (to prevent duplicate likes)

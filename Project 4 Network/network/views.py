@@ -6,12 +6,13 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.contrib import messages
 
 from .models import User, Post, Follow, Like
 
 
 def index(request):
-    all_posts = Post.objects.all().order_by("id").reverse()##.prefetch_related('likes')
+    all_posts = Post.objects.all().order_by("id").reverse()##.prefetch_related('post_likes')
 
     # Pagination split by 10 posts at time
     paginator = Paginator(all_posts, 10)
@@ -20,7 +21,7 @@ def index(request):
 
     # Add a is_liked field to each post
     for post in posts_in_page:
-        post.is_liked = request.user in post.like.all() if request.user.is_authenticated else False
+        post.is_liked = request.user in post.post_likes.all() if request.user.is_authenticated else False
 
     return render(request, "network/index.html", {
         "allPosts": all_posts,
@@ -90,7 +91,7 @@ def new_post(request):
 
 def profile(request, user_id):
     user = User.objects.get(pk=user_id)
-    all_posts = Post.objects.filter(user=user).order_by("id").reverse()##.prefetch_related('likes')
+    all_posts = Post.objects.filter(user=user).order_by("id").reverse()##.prefetch_related('post_likes')
 
     following = Follow.objects.filter(user=user)
     followers = Follow.objects.filter(user_followed=user)
@@ -159,13 +160,14 @@ def edit_post(request, post_id):
             post.save()
             return JsonResponse({"success": True, "content": post.content})
         else:
-            return JsonResponse({"success": False, "error": "Unauthorized"}, status=403)
+            return JsonResponse({"success": False, "error": "You are not the author of this post."}, status=403)
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
-@login_required
-def toggle_like(request, post_id):
+def like(request, post_id):
+    #### DA SISTEMARE IL MESSAGGIOOOO PERCHé ORA NE MOSTRA TROPPI E IN GENERALE, NON SE PROVO A CLICCARE
     if not request.user.is_authenticated:
-        return JsonResponse({"success": False, "error": "Unauthorized"}, status=401)
+        messages.error(request, "You must be logged in to like a post.")
+        return JsonResponse({"success": False, "error": "You must be logged in to like this post."}, status=401)
 
     post = Post.objects.get(pk=post_id)
     user = request.user
@@ -179,5 +181,9 @@ def toggle_like(request, post_id):
         liked = True
 
     # Return the updated like count
-    like_count = post.like.count()
-    return JsonResponse({"success": True, "liked": liked, "like_count": like_count})
+    like_count = post.post_likes.count()
+    return JsonResponse({
+        "success": True,
+        "liked": liked,
+        "like_count": like_count
+        })

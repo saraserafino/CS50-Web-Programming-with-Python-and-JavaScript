@@ -8,8 +8,7 @@
             <h2>New post</h2>
             <form action="{% url 'new_post' %}" method="post">
                 {% csrf_token %}
-                <textarea name="content" row="4" cols="100"></textarea>
-                <br>
+                <div class="content"><textarea name="content" rows="5" cols="159"></textarea></div>
                 <input type="submit" value="Post" class="btn btn-primary">
             </form>
         </div>
@@ -17,33 +16,36 @@
 
     <div class="all_posts">
         {% for post in posts_in_page %}
-            <div class="row post">
+            <div class="row post" data-post-id="{{ post.id }}">
                 <div class="col">
 
                 <!-- Edit button (only for owner of post) -->
-                <div style="position: absolute;top: 0;right: 0;">
+                <div class="edit-save">
                     {% if request.user == post.user %}
                         <button class="edit-btn btn btn-outline-secondary">Edit</button>
-                        <button class="save-btn btn btn-outline-secondary" style="display: none;">Save</button>
+                        <!-- Save button is hidden by default (with CSS) and shown when required (with JavaScript)-->
+                        <button class="save-btn btn btn-outline-secondary">Save</button>
                     {% endif %}
                 </div>
 
                 <h5 class="username"><a href="{% url 'profile' post.user.id %}">@{{ post.user }}</a></h5>
                 <h6 class="content">{{ post.content }}</h6>
-                <!-- Like button -->
                 <p class="date">{{ post.date }}</p>
-                <p class="like">
-                    {% if user.is_authenticated %}
-                    <button type="submit" class="like-btn btn p-0
+                <!-- Like button -->
+                <p>
+                    <button type="button" class="like-btn btn p-0
                         {% if post.is_liked %}text-danger
                         {% else %}text-outline-danger
                         {% endif %}">
-                        {% if post.is_liked %}<span style="color:red">&#9829</span>
+                        <!--data-liked="{{ post.is_liked }}">questo non serve mi sa-->
+                        {% if user.is_authenticated %}
+                            {% if post.is_liked %}<span style="color:red">&#9829</span>
+                            {% else %}&#9825
+                            {% endif %}
                         {% else %}&#9825
                         {% endif %}
                     </button>
-                    {% endif %}
-                    <span style="color:grey;font-size: smaller">{{ post.like.all.count }}</span>
+                    <span class="like-count">{{ post.post_likes.all.count }}</span>
                 </p>
                 </div>
             </div>
@@ -60,12 +62,4 @@
             {% endif %}
         </ul>
       </nav>
-{% endblock %}
-
-{% block script %}
-    <script>
-    // Pass the CSRF token to JavaScript
-    const csrftoken = '{{ csrf_token }}';
-    </script>
-    <script src="{% static 'network/edit_like.js' %}"></script>
 {% endblock %}
