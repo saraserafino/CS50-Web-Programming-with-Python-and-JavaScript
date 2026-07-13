@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Like/unlike
-    // Disable buttons for non-authenticated users
+    // Disable button for non-authenticated users
     document.querySelectorAll('.like-btn').forEach(button => {
         if (!button.closest('.post').dataset.userAuthenticated) {
             button.disabled = true;

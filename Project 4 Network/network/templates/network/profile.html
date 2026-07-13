@@ -1,4 +1,5 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
     <h1>{{ username }} </h1>
@@ -29,13 +30,14 @@
 
     <div class="all_posts">
         {% for post in posts_in_page %}
-        <div class="row post" data-post-id="{{ post.id }}">
+        <div class="row post" data-post-id="{{ post.id }}" data-user-authenticated="{{ user.is_authenticated }}">
             <div class="col">
 
             <!-- Edit button (only for owner of post) -->
             <div class="edit-save">
                 {% if request.user == post.user %}
                     <button class="edit-btn btn btn-outline-secondary">Edit</button>
+                    <!-- Save button is hidden by default (with CSS) and shown when required (with JavaScript)-->
                     <button class="save-btn btn btn-outline-secondary">Save</button>
                 {% endif %}
             </div>
@@ -43,9 +45,22 @@
             <h5 class="username"><a href="{% url 'profile' post.user.id %}">@{{ post.user }}</a></h5>
             <h6 class="content">{{ post.content }}</h6>
             <p class="date">{{ post.date }}</p>
-
             <!-- Like button -->
-            
+            <p>
+                <button type="button" class="like-btn btn p-0
+                    {% if post.is_liked %}text-danger
+                    {% else %}text-outline-danger
+                    {% endif %}"
+                    data-liked="{{ post.is_liked }}">
+                    {% if user.is_authenticated %}
+                        {% if post.is_liked %}<span style="color:red">&#9829</span>
+                        {% else %}&#9825
+                        {% endif %}
+                    {% else %}&#9825
+                    {% endif %}
+                </button>
+                <span class="like-count">{{ post.post_likes.all.count }}</span>
+            </p>
             </div>
         </div>
         {% endfor %}

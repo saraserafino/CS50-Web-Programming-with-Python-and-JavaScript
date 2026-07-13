@@ -37,7 +37,7 @@
                         {% if post.is_liked %}text-danger
                         {% else %}text-outline-danger
                         {% endif %}"
-                        data-liked="{{ post.is_liked }}"><!--questo non serve mi sa-->
+                        data-liked="{{ post.is_liked }}">
                         {% if user.is_authenticated %}
                             {% if post.is_liked %}<span style="color:red">&#9829</span>
                             {% else %}&#9825

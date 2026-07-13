@@ -11,7 +11,7 @@ from .models import User, Post, Follow, Like
 
 
 def index(request):
-    all_posts = Post.objects.all().order_by("id").reverse()##.prefetch_related('post_likes')
+    all_posts = Post.objects.all().order_by("id").reverse()
 
     # Pagination split by 10 posts at time
     paginator = Paginator(all_posts, 10)
@@ -20,7 +20,7 @@ def index(request):
 
     # Add a is_liked field to each post
     for post in posts_in_page:
-        post.is_liked = request.user in post.post_likes.all() if request.user.is_authenticated else False
+        post.is_liked = Like.objects.filter(user=request.user, post=post).exists() if request.user.is_authenticated else False
 
     return render(request, "network/index.html", {
         "allPosts": all_posts,
@@ -90,7 +90,7 @@ def new_post(request):
 
 def profile(request, user_id):
     user = User.objects.get(pk=user_id)
-    all_posts = Post.objects.filter(user=user).order_by("id").reverse()##.prefetch_related('post_likes')
+    all_posts = Post.objects.filter(user=user).order_by("id").reverse()
 
     following = Follow.objects.filter(user=user)
     followers = Follow.objects.filter(user_followed=user)
@@ -103,6 +103,10 @@ def profile(request, user_id):
     paginator = Paginator(all_posts, 10)
     page_number = request.GET.get('page')
     posts_in_page = paginator.get_page(page_number)
+
+    # Add a is_liked field to each post
+    for post in posts_in_page:
+        post.is_liked = Like.objects.filter(user=request.user, post=post).exists() if request.user.is_authenticated else False
 
     return render(request, "network/profile.html", {
         "username": user.username,
@@ -145,6 +149,10 @@ def following(request):
     paginator = Paginator(following_posts, 10)
     page_number = request.GET.get('page')
     posts_in_page = paginator.get_page(page_number)
+    
+    # Add a is_liked field to each post
+    for post in posts_in_page:
+        post.is_liked = Like.objects.filter(user=request.user, post=post).exists() if request.user.is_authenticated else False
 
     return render(request, "network/following.html", {
         "posts_in_page": posts_in_page,
