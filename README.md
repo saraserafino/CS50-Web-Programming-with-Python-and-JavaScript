@@ -2,7 +2,7 @@
 Second to last &amp; final project of the "[CS50's Web Programming with Python and JavaScript](https://cs50.harvard.edu/web/)" course @ HarvardX.
 
 ## 4th project: social network
-The specification to implement for this project can be found [here](https://cs50.harvard.edu/web/projects/4/network/#specification) or are the followings:
+A [video](https://www.youtube.com/watch?v=cDCqG4iPd2c) demonstrates the web app's functionality, that is to implement the followings:
 - **New Post**: Users who are signed in should be able to write a new text-based post by filling in text into a text area and then clicking a button to submit the post.
     - The screenshot at the top of this specification shows the “New Post” box at the top of the “All Posts” page. You may choose to do this as well, or you may make the “New Post” feature a separate page.
 - **All Posts**: The “All Posts” link in the navigation bar should take the user to a page where they can see all posts from all users, with the most recent posts first.
