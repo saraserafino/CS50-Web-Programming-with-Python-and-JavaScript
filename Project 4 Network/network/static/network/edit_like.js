@@ -51,6 +51,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Like/unlike
+    // Disable buttons for non-authenticated users
+    document.querySelectorAll('.like-btn').forEach(button => {
+        if (!button.closest('.post').dataset.userAuthenticated) {
+            button.disabled = true;
+        }
+    });
+    // Like functionality
     document.querySelectorAll('.like-btn').forEach(button => {
         button.addEventListener('click', function() {
             const postDiv = this.closest('.post');
@@ -64,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify(`action=${isLiked ? 'unlike' : 'like'}`)
+                body: JSON.stringify({ action: isLiked ? 'unlike' : 'like' })
             })
             .then(response => response.json())
             .then(data => {

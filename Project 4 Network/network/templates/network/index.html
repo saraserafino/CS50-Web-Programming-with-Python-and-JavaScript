@@ -16,7 +16,7 @@
 
     <div class="all_posts">
         {% for post in posts_in_page %}
-            <div class="row post" data-post-id="{{ post.id }}">
+            <div class="row post" data-post-id="{{ post.id }}" data-user-authenticated="{{ user.is_authenticated }}">
                 <div class="col">
 
                 <!-- Edit button (only for owner of post) -->
@@ -36,8 +36,8 @@
                     <button type="button" class="like-btn btn p-0
                         {% if post.is_liked %}text-danger
                         {% else %}text-outline-danger
-                        {% endif %}">
-                        <!--data-liked="{{ post.is_liked }}">questo non serve mi sa-->
+                        {% endif %}"
+                        data-liked="{{ post.is_liked }}"><!--questo non serve mi sa-->
                         {% if user.is_authenticated %}
                             {% if post.is_liked %}<span style="color:red">&#9829</span>
                             {% else %}&#9825

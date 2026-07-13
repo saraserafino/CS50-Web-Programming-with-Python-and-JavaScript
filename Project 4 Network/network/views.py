@@ -6,7 +6,6 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.contrib import messages
 
 from .models import User, Post, Follow, Like
 
@@ -164,9 +163,8 @@ def edit_post(request, post_id):
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
 def like(request, post_id):
-    #### DA SISTEMARE IL MESSAGGIOOOO PERCHé ORA NE MOSTRA TROPPI E IN GENERALE, NON SE PROVO A CLICCARE
+    # @login_required is not enough because it shows a generic error when a non authenticated user tries to like a post
     if not request.user.is_authenticated:
-        messages.error(request, "You must be logged in to like a post.")
         return JsonResponse({"success": False, "error": "You must be logged in to like this post."}, status=401)
 
     post = Post.objects.get(pk=post_id)
