@@ -63,40 +63,38 @@ def register(request):
         return render(request, "recipebook/register.html")
 
 @login_required
-def add_recipe(request): ## TO FIX ACCORDINGLY
+def add_recipe(request):
     if request.method == "GET":
         all_dishes = Dish.objects.all()
         all_labels = Label.objects.all()
         all_ingredients = Ingredient.objects.all()
-        return render(request, "recipebook/create.html", {
+        return render(request, "recipebook/add_recipe.html", {
             "dishes": all_dishes,
             "labels": all_labels,
             "ingredients": all_ingredients
         })
     else: # == "POST"
-        # Get data from the form in bookrecipe/create.html
+        # Get data from the form in bookrecipe/add_recipe.html
         title = request.POST["title"]
         procedure = request.POST["procedure"]
-        ##image = request.POST["image"]
+        image = request.FILES.get("image")
         time_required = int(request.POST["time_required"])
         is_new = request.POST.get("is_new", False) == "on"
         base_portion = int(request.POST["base_portion"])
-        # Create a new listing object and insert it in the database
+        # Create a new object and insert it in the database
         new_recipe = Recipe(
             title = title,
             procedure = procedure,
-            ##image = image,
+            image = image,
             time_required = int(time_required),
-            favourites = False,
             is_new = is_new,
             base_portion = base_portion
         )
         new_recipe.save()
 
-        # Handle many-to-many fields
-        dishes = request.POST.getlist["dish"]
-        labels = request.POST.getlist["label"]
-        ingredients = request.POST.getlist["ingredient"]
+        # Handle many-to-many fields of dishes and labels
+        dishes = request.POST.getlist("dish")
+        labels = request.POST.getlist("label")
 
         for dish_id in dishes:
             dish = Dish.objects.get(pk=dish_id)
@@ -104,9 +102,43 @@ def add_recipe(request): ## TO FIX ACCORDINGLY
         for label_id in labels:
             label = Label.objects.get(pk=label_id)
             new_recipe.label.add(label)
-        for ingredient_id in ingredients:
-            ingredient = Ingredient.objects.get(pk=ingredient_id)
-            new_recipe.ingredient.add(ingredient)
 
-        # Redirect to index page
+        # Handle ingredients
+        ingredient_quantities = request.POST.getlist("ingredient_quantity[]")
+        ingredient_units = request.POST.getlist("ingredient_unit[]")
+        ingredient_names = request.POST.getlist("ingredient_name[]")
+
+        for quantity, unit, name in zip(ingredient_quantities, ingredient_units, ingredient_names):
+            ingredient, created = Ingredient.objects.get_or_create(ingredient_name=name)
+            RecipeIngredient.objects.create(
+                recipe=new_recipe,
+                ingredient=ingredient,
+                quantity=float(quantity),
+                unit=unit
+            )
+
+        # Redirect to index page ## When you'll create it, redirect to the page of the created recipe
         return HttpResponseRedirect(reverse(index))
+
+@login_required
+def favourites(request):
+    favourites = request.user.favourites.all()
+    return render(request, "recipebook/favourites.html", {
+        "favourites": favourites,
+    })
+
+# Display recipes
+def recipes(request, id):
+    recipes_data = Recipe.objects.get(pk=id)
+    is_fav = request.user in recipes_data.favourites.all()
+    if request.method == "POST":
+        if is_fav: # Remove from favourites
+            recipes_data.favourites.remove(request.user)
+        else: # Add to favourites
+            recipes_data.favourites.add(request.user)
+    # Update the status
+    is_fav = request.user in recipes_data.favourites.all()
+    return render(request, "recipebook/recipes.html", {
+        "recipes": recipes_data,
+        "is_fav": is_fav
+    })

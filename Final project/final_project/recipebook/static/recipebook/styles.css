@@ -1,0 +1,33 @@
+body {
+    margin: 14px;
+}
+
+a:link {
+    color: rgb(255, 149, 0);
+    background-color: transparent;
+    text-decoration: none;
+}
+a:visited {
+    color: rgb(255, 149, 0);
+    background-color: transparent;
+    text-decoration: none;
+}
+a:hover {
+    color: rgb(225, 132, 3);
+    background-color: transparent;
+    text-decoration: underline;
+}
+
+.btn-add-ingredient{
+    background-color: rgb(255, 149, 0);
+    border: none;
+    color: rgb(69, 7, 90);
+    text-align: center;
+    border-radius: 10px;
+}
+
+.btn-remove-ingredient{
+    background-color: transparent;
+    border: none;
+    padding-top: 7px;
+}

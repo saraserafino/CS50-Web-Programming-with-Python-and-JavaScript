@@ -1,9 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>Hello</title>
-</head>
+{% extends "recipebook/layout.html" %}
+{% load static %}
 
-<body>
-</body>
-</html>
+{% block body %}
+<!-- User can filter the recipes, once done they are redirected to a page of filtered recipes. -->
+    <h2>All the recipes</h2>
+    <form action="" method="POST" class="my-3">
+        {% csrf_token %}
+        <label for="dish">Filter by dish:</label>
+        <select name="dish" id="dish">
+        <option value="">All Dishes</option>
+            {% for dish in dishes %}
+                <option value="{{ dish.id }}">{{ dish }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-outline-primary btn-sm">Select</button>
+    </form>
+    
+    <div class="row mx-3">
+    {% for recipe in recipes %}
+        <div class="card mx-3" style="width: 15rem;">
+            <!-- Clicking on a recipe takes user to its page -->
+            <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
+            <img class="card-img-top" src="{{ recipe.image }}" alt="{{ recipe.title }}">
+            <div class="card-body">
+            <h5 class="card-title">{{ recipe.title }}</h5>
+            <p class="card-text">{{ recipe.procedure|truncatechars:100 }}</p>
+            </a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="alert alert-warning">No recipes meet these criteria &#128542</div>
+    {% endfor %}
+    </div>
+{% endblock %}

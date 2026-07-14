@@ -30,7 +30,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     title = models.CharField(max_length=50)
     procedure = models.CharField(max_length=1000)
-    ##image = models.ImageField() ## Take care of it when the rest is functioning
+    image = models.ImageField(upload_to="images/")
     # Filters for recipe, multiple selection is possible
     dish = models.ManyToManyField(Dish, blank=True, related_name="dish")
     label = models.ManyToManyField(Label, blank=True, related_name="label")

@@ -1,0 +1,38 @@
+{% extends "recipebook/layout.html" %}
+{% load static %}
+TODO
+
+{% block body %}
+<!-- Favourite buttons -->
+{% if user.is_authenticated %}
+<div class="d-flex justify-content-end mb-3">
+<form method="POST" action="{% url 'recipes' recipes.id %}">
+    {% csrf_token %}
+    {% if is_fav %}
+        <button type="submit" class="btn btn-danger btn-sm">Remove from favourites</button>
+    {% else %}
+        <button type="submit" class="btn btn-success btn-sm">Add to favourites</button>
+    {% endif %}
+</form>
+{% endif %}
+
+<!-- Image and details (shown side by side) -->
+<div class="row">
+    <div class="col-md-4">
+        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" height="400px">
+    </div>
+    <div class="col-md-6">
+        <h1>{{ recipe.title }}</h1>
+        <p>{{ recipe.procedure }}</p>
+        <h4>Details:</h4>
+        <ul>
+            <li>Category: {{ recipe.category }}</li>
+            <li>Status: {% if recipe.is_fav %}Active{% else %}Closed{% endif %}</li>
+        </ul>
+        <h4>Original price: {{ recipe.quantity|floatformat:2 }}€</h4>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

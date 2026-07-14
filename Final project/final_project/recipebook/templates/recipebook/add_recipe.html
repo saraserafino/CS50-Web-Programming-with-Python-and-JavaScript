@@ -1,0 +1,90 @@
+{% extends "recipebook/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h2>Add New Recipe</h2>
+    <br>
+    <form action="{% url 'add_recipe' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <input type="text" name="title" class="form-control" id="title" placeholder="Name of this delicious dish">
+        </div>
+
+        <div class="form-group">
+            <label>Ingredients:</label>
+            <div id="ingredients-container">
+                <!-- First row i.e. ingredient -->
+                <div class="ingredient-row row mb-2">
+                    <div class="col-md-2">
+                        <input type="number" name="ingredient_quantity[]" class="form-control" placeholder="Quantity" step="1" min="0.0" required>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="ingredient_unit[]" class="form-control" required>
+                            <option value="grams">grams</option>
+                            <option value="ml">ml</option>
+                            <option value="teaspoon">teaspoon</option>
+                            <option value="tablespoon">tablespoon</option>
+                            <option value="pieces">pieces</option>
+                            <option value="by heart">by heart</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="ingredient_name[]" class="form-control" placeholder="Ingredient name" required>
+                    </div>
+                    <div class="col-sm-1"> <!-- Button for removing an ingredient-->
+                        <button type="button" class="btn-remove-ingredient" onclick="removeIngredientRow(this)">&#10060</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Button for adding an ingredient-->
+            <button type="button" class="btn-add-ingredient" onclick="addIngredientRow()">&#9998 Add ingredient</button>
+        </div>
+
+        <div class="form-group">
+            <label for="procedure">Explain the procedure:</label>
+            <!-- Before, I wrote <input type="text" name="procedure" class="form-control" id="procedure" placeholder="Procedure"> -->
+            <textarea name="procedure" class="form-control" id="procedure" placeholder="1. ..." rows="5" cols="159"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="image">Upload an image:</label>
+            <input type="file" name="image" class="form-control-file" id="image">
+        </div>
+        
+        <div class="form-inline">
+            <label for="time_required">Enter the time required in minutes: </label>
+            <input type="number" name="time_required" class="form-control col-md-2" id="time_required" placeholder="Time required" min="0">
+
+            <label for="base_portion" class="col-md-3">Enter the base number of portions:</label>
+            <input type="number" name="base_portion" class="form-control" id="base_portion" placeholder="Base portion" min="0">
+        </div><br>
+
+        <!-- Add to which filter it belongs to (options have been added through the shell)-->
+
+        <div class="form-group">
+            <label for="dish">Choose dish type:</label>
+            <select name="dish" id="dish" multiple class="chosen-select" data-placeholder="Dish type">
+                {% for dish in dishes %}
+                    <option value="{{ dish.id }}">{{ dish.dish_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="label">Choose label:</label>
+            <select name="label" id="label" multiple class="chosen-select" data-placeholder="Label">
+                {% for label in labels %}
+                    <option value="{{ label.id }}">{{ label.label_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group form-check">
+            <input type="checkbox" name="is_new" class="form-check-input" id="is_new">
+            <label class="form-check-label" for="is_new">Tick if you have NOT tried the recipe yet</label>
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+    </form>
+{% endblock %}
