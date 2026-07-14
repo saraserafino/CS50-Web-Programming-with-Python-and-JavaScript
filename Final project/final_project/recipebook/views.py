@@ -10,7 +10,14 @@ from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, Mea
 
 # Create your views here.
 def index(request):
-    return render(request, "recipebook/index.html")
+    dishes = Dish.objects.all()
+    labels = Label.objects.all()
+    recipes = Recipe.objects.all()
+    return render(request, "recipebook/index.html", {
+        "dishes": dishes,
+        "labels": labels,
+        "recipes": recipes,
+    })
 
 def login_view(request):
     if request.method == "POST":

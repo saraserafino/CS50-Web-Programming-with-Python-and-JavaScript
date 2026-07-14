@@ -4,16 +4,26 @@
 {% block body %}
 <!-- User can filter the recipes, once done they are redirected to a page of filtered recipes. -->
     <h2>All the recipes</h2>
+    
     <form action="" method="POST" class="my-3">
         {% csrf_token %}
         <label for="dish">Filter by dish:</label>
-        <select name="dish" id="dish">
-        <option value="">All Dishes</option>
+        <select name="dish" id="dish" multiple class="chosen-select" data-placeholder="Dish type">
+        <option value="">All dishes</option>
             {% for dish in dishes %}
-                <option value="{{ dish.id }}">{{ dish }}</option>
+                <option value="{{ dish.id }}">{{ dish.dish_name }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn btn-outline-primary btn-sm">Select</button>
+
+        <label for="label">Filter by label:</label>
+        <select name="label" id="label" multiple class="chosen-select" data-placeholder="Label">
+            <option value="">All labels</option>
+            {% for label in labels %}
+                <option value="{{ label.id }}">{{ label.label_name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-outline-primary btn-sm">Apply filter</button>
     </form>
     
     <div class="row mx-3">
