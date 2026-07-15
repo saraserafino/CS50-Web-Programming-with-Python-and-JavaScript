@@ -5,7 +5,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-
 from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, MealPlan
 
 # Create your views here.
@@ -85,7 +84,6 @@ def add_recipe(request):
         title = request.POST["title"]
         procedure = request.POST["procedure"]
         image = request.FILES.get("image")
-        time_required = int(request.POST["time_required"])
         is_new = request.POST.get("is_new", False) == "on"
         base_portion = int(request.POST["base_portion"])
         # Create a new object and insert it in the database
@@ -93,7 +91,6 @@ def add_recipe(request):
             title = title,
             procedure = procedure,
             image = image,
-            time_required = int(time_required),
             is_new = is_new,
             base_portion = base_portion
         )
@@ -148,4 +145,30 @@ def recipes(request, id):
     return render(request, "recipebook/recipes.html", {
         "recipes": recipes_data,
         "is_fav": is_fav
+    })
+
+# Display filtered recipes
+def display_filters(request):
+    all_dishes = Dish.objects.all()
+    all_labels = Label.objects.all()
+    # Default: all recipes, which is also base queryset for the filters
+    recipes = Recipe.objects.all()
+    # Filter recipes from list of possible multiple IDs
+    if request.method == "POST" or request.method == "GET":
+        dish_ids = request.POST.getlist("dish") if request.method == "POST" else request.GET.getlist("dish")
+        label_ids = request.POST.getlist("label") if request.method == "POST" else request.GET.getlist("label")
+        # Convert string IDs to integers
+        dish_ids = [int(id) for id in dish_ids] if dish_ids else []
+        label_ids = [int(id) for id in label_ids] if label_ids else []
+        if dish_ids:
+            recipes = recipes.filter(dish__id__in=dish_ids)
+        if label_ids:
+            recipes = recipes.filter(label__id__in=label_ids)
+        # Avoid duplicates if multiple filters match the same recipe
+        recipes = recipes.distinct()
+
+    return render(request, "recipebook/index.html", {
+        "recipes": recipes,
+        "dishes": all_dishes,
+        "labels": all_labels
     })

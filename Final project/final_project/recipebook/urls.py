@@ -11,6 +11,7 @@ urlpatterns = [
     path("add_recipe", views.add_recipe, name="add_recipe"),
     path("favourites", views.favourites, name="favourites"),
     path("recipes/<int:id>", views.recipes, name="recipes"),
+    path("display_filters", views.display_filters, name="display_filters"),
 
 ]
 

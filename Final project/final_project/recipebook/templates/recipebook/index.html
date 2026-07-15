@@ -2,14 +2,12 @@
 {% load static %}
 
 {% block body %}
+    <h2>Recipes</h2>
 <!-- User can filter the recipes, once done they are redirected to a page of filtered recipes. -->
-    <h2>All the recipes</h2>
-    
-    <form action="" method="POST" class="my-3">
+    <form action="{% url 'display_filters' %}" method="POST" class="my-3">
         {% csrf_token %}
         <label for="dish">Filter by dish:</label>
         <select name="dish" id="dish" multiple class="chosen-select" data-placeholder="Dish type">
-        <option value="">All dishes</option>
             {% for dish in dishes %}
                 <option value="{{ dish.id }}">{{ dish.dish_name }}</option>
             {% endfor %}
@@ -17,25 +15,35 @@
 
         <label for="label">Filter by label:</label>
         <select name="label" id="label" multiple class="chosen-select" data-placeholder="Label">
-            <option value="">All labels</option>
             {% for label in labels %}
                 <option value="{{ label.id }}">{{ label.label_name }}</option>
             {% endfor %}
         </select>
 
-        <button type="submit" class="btn btn-outline-primary btn-sm">Apply filter</button>
+        <button type="submit" class="btn btn-warning btn-sm">Apply filter</button>
     </form>
     
     <div class="row mx-3">
     {% for recipe in recipes %}
-        <div class="card mx-3" style="width: 15rem;">
-            <!-- Clicking on a recipe takes user to its page -->
+        <div class="card mx-3">
+            <!-- Clicking on a recipe takes user to a page specific to that listing -->
             <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
-            <img class="card-img-top" src="{{ recipe.image }}" alt="{{ recipe.title }}">
+            <div class="recipe-image-container">
+            <img class="card-img-top recipe-image" src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+            </div>
             <div class="card-body">
             <h5 class="card-title">{{ recipe.title }}</h5>
-            <p class="card-text">{{ recipe.procedure|truncatechars:100 }}</p>
             </a>
+            <div class="mb-2">
+                {% for dish in recipe.dish.all %}
+                <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                    {{ dish }}</span></a>
+                {% endfor %}
+                {% for label in recipe.label.all %}
+                <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                    {{ label }}</span></a>
+                {% endfor %}
+            </div>
             </div>
         </div>
     {% empty %}

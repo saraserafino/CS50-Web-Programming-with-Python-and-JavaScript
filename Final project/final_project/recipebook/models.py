@@ -38,8 +38,6 @@ class Recipe(models.Model):
     ingredient = models.ManyToManyField(Ingredient, through="RecipeIngredient")
     # One recipe can be in the favourites of different people -> many-to-many relationship
     favourites = models.ManyToManyField(User, blank=True, related_name="favourites")
-    # Filter by time required to prepare the recipe
-    time_required = models.PositiveIntegerField(help_text="Time in minutes.")
     # "New recipe" status for recipes that have not been tried yet
     is_new = models.BooleanField(default=False, help_text="Mark as new if you have not tried it yet.")
 
@@ -58,13 +56,17 @@ class Recipe(models.Model):
             })
         return scaled_ingredients
 
+    def ingredients_list(self):
+        return [f"{ingredient.quantity} {ingredient.unit} of {ingredient.ingredient.ingredient_name}"
+                for ingredient in self.recipe_ingredients.all()]
+
     def __str__(self):
         return self.title
 
 # Intermediary model between the many-to-many relationship between Ingredient and Recipe (https://docs.djangoproject.com/en/5.0/topics/db/models/#intermediary-manytomany)
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="recipe_ingredients")
     quantity = models.DecimalField(max_digits=6, decimal_places=2)
     unit = models.CharField(max_length=10, blank=True, null=True)
 

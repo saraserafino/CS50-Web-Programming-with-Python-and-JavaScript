@@ -1,9 +1,8 @@
 {% extends "recipebook/layout.html" %}
 {% load static %}
-TODO
 
 {% block body %}
-<!-- Favourite buttons -->
+<!-- Favourite buttons 
 {% if user.is_authenticated %}
 <div class="d-flex justify-content-end mb-3">
 <form method="POST" action="{% url 'recipes' recipes.id %}">
@@ -14,25 +13,41 @@ TODO
         <button type="submit" class="btn btn-success btn-sm">Add to favourites</button>
     {% endif %}
 </form>
-{% endif %}
+{% endif %}-->
 
 <!-- Image and details (shown side by side) -->
 <div class="row">
     <div class="col-md-4">
-        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" height="400px">
+        <img src="{{ recipes.image.url }}" alt="{{ recipes.title }}" height="400px">
     </div>
-    <div class="col-md-6">
-        <h1>{{ recipe.title }}</h1>
-        <p>{{ recipe.procedure }}</p>
-        <h4>Details:</h4>
-        <ul>
-            <li>Category: {{ recipe.category }}</li>
-            <li>Status: {% if recipe.is_fav %}Active{% else %}Closed{% endif %}</li>
-        </ul>
-        <h4>Original price: {{ recipe.quantity|floatformat:2 }}€</h4>
-        {% endif %}
+
+    <div class="col-md-4">
+        <h2>{{ recipes.title }}</h2>
+        <div class="mb-2">
+            {% for dish in recipes.dish.all %}
+            <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                {{ dish }}</span></a>
+            {% endfor %}
+            {% for label in recipes.label.all %}
+            <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                {{ label }}</span></a>
+            {% endfor %}
+            {% if recipes.is_new %}
+            <span class="badge badge-pill badge-new me-1">This recipe hasn't been tried by Prociona yet</span>
+            {% endif %}
         </div>
+        <br><br>
+        <h4>Ingredients:</h4>
+        <ul class="list-group">
+            {% for ingredient in recipes.ingredients_list %}
+            <li class="list-group-item"><input type="checkbox">  {{ ingredient }}</li>
+            {% endfor %}
+        </ul>
+    </div>
     </div>
 </div>
+<br>
+<h4>Procedure:</h4>
+<p>{{ recipes.procedure }}</p>
 
 {% endblock %}
