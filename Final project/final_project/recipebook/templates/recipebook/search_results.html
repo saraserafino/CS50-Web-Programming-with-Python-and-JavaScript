@@ -1,0 +1,38 @@
+{% extends "recipebook/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h3>Search results for "{{ query }}":</h3>
+
+    <div class="row mx-3">
+        {% for recipe in recipes %}
+            <div class="card mx-3">
+                <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
+                    <div class="recipe-image-container">
+                    <img class="card-img-top recipe-image" alt="{{ recipe.title }}" height="400px"{% if recipe.url %} src="{{ recipe.url }}" {% else %} src="{{ recipe.image.url }}" {% endif %}>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.title }}</h5>
+                    </a>
+                    <div class="mb-2">
+                        {% for dish in recipe.dish.all %}
+                            <a href="{% url 'display_filters' %}?dish={{ dish.id }}">
+                                <span class="badge badge-pill badge-dish me-1">{{ dish }}</span>
+                            </a>
+                        {% endfor %}
+                        {% for label in recipe.label.all %}
+                            <a href="{% url 'display_filters' %}?label={{ label.id }}">
+                                <span class="badge badge-pill badge-label me-1">{{ label }}</span>
+                            </a>
+                        {% endfor %}
+                        {% if recipe.is_new %}
+                            <span class="badge badge-pill badge-new me-1">New Recipe</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-warning">No recipes match your search for "{{ query }}".</div>
+        {% endfor %}
+    </div>
+{% endblock %}

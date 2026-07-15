@@ -29,8 +29,10 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     title = models.CharField(max_length=50)
-    procedure = models.CharField(max_length=1000)
-    image = models.ImageField(upload_to="images/")
+    procedure = models.CharField(max_length=10000)
+    # Image can be uploaded from files or url
+    image = models.ImageField(upload_to="images/", blank=True, null=True)
+    url = models.URLField(max_length=500, blank=True, null=True)
     # Filters for recipe, multiple selection is possible
     dish = models.ManyToManyField(Dish, blank=True, related_name="dish")
     label = models.ManyToManyField(Label, blank=True, related_name="label")

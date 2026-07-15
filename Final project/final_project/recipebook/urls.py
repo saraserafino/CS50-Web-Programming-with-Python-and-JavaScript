@@ -12,7 +12,7 @@ urlpatterns = [
     path("favourites", views.favourites, name="favourites"),
     path("recipes/<int:id>", views.recipes, name="recipes"),
     path("display_filters", views.display_filters, name="display_filters"),
-
+    path("search/", views.search, name="search")
 ]
 
 # Ensures that media files are served during development

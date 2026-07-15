@@ -18,7 +18,7 @@
 <!-- Image and details (shown side by side) -->
 <div class="row">
     <div class="col-md-4">
-        <img src="{{ recipes.image.url }}" alt="{{ recipes.title }}" height="400px">
+    <img class="card-img-top recipe-image" alt="{{ recipes.title }}" height="400px"{% if recipes.url %} src="{{ recipes.url }}" {% else %} src="{{ recipes.image.url }}" {% endif %}>
     </div>
 
     <div class="col-md-4">

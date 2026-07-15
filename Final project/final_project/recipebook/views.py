@@ -4,6 +4,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+import random
+from django.db.models import Q
 
 from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, MealPlan
 
@@ -83,17 +85,26 @@ def add_recipe(request):
         # Get data from the form in bookrecipe/add_recipe.html
         title = request.POST["title"]
         procedure = request.POST["procedure"]
-        image = request.FILES.get("image")
         is_new = request.POST.get("is_new", False) == "on"
         base_portion = int(request.POST["base_portion"])
-        # Create a new object and insert it in the database
-        new_recipe = Recipe(
-            title = title,
-            procedure = procedure,
-            image = image,
-            is_new = is_new,
-            base_portion = base_portion
-        )
+        url = request.POST["url"]
+        if url:
+            new_recipe = Recipe(
+                title = title,
+                procedure = procedure,
+                url = url,
+                is_new = is_new,
+                base_portion = base_portion
+            )
+        else:
+            image = request.FILES.get("image")
+            new_recipe = Recipe(
+                title = title,
+                procedure = procedure,
+                image = image,
+                is_new = is_new,
+                base_portion = base_portion
+            )
         new_recipe.save()
 
         # Handle many-to-many fields of dishes and labels
@@ -121,8 +132,10 @@ def add_recipe(request):
                 unit=unit
             )
 
-        # Redirect to index page ## When you'll create it, redirect to the page of the created recipe
-        return HttpResponseRedirect(reverse(index))
+        # Redirect to the page of the created recipe
+        return render(request, "recipebook/recipes.html", {
+        "recipes": new_recipe,
+        })
 
 @login_required
 def favourites(request):
@@ -131,7 +144,7 @@ def favourites(request):
         "favourites": favourites,
     })
 
-# Display recipes
+# Display a recipe
 def recipes(request, id):
     recipes_data = Recipe.objects.get(pk=id)
     is_fav = request.user in recipes_data.favourites.all()
@@ -172,3 +185,26 @@ def display_filters(request):
         "dishes": all_dishes,
         "labels": all_labels
     })
+
+# Function for searching a recipe
+def search(request):
+    query = request.GET.get("q", "").strip()
+    if not query: # If no query, return all recipes
+        recipes = Recipe.objects.all()
+    else:
+        # Search for recipes where the title or procedure or ingredients contains the query (i stands for case-insensitive)
+        recipes = Recipe.objects.filter(
+            Q(title__icontains=query) |
+            Q(procedure__icontains=query) |
+            Q(recipe_ingredients__ingredient__ingredient_name__icontains=query)
+        ).distinct() # distinct() avoids duplicate recipes
+
+    return render(request, "recipebook/search_results.html", {
+        "query": query,
+        "recipes": recipes,
+    })
+
+## STILL TO IMPLEMENT THE RANDOM PAGE
+def random_recipe(request):
+    random_entry = random.choice(recipes)
+    return recipes(request, random_entry)
