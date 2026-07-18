@@ -34,7 +34,7 @@
     <div class="row mx-3">
     {% for recipe in recipes %}
         <div class="card mx-3">
-            <!-- Clicking on a recipe takes user to a page specific to that listing -->
+            <!-- Clicking on a recipe takes user to its specific page -->
             <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
             <div class="recipe-image-container">
             <img class="card-img-top recipe-image" alt="{{ recipe.title }}" {% if recipe.url %} src="{{ recipe.url }}" {% else %} src="{{ recipe.image.url }}" {% endif %}>

@@ -39,3 +39,56 @@ function removeIngredientRow(button) {
         alert("You must have at least one ingredient.");
     }
 }
+// Working on this for edit
+document.addEventListener('DOMContentLoaded', function() {
+    // Edit recipe
+    document.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const recipeDiv = this.closest('.recipe');
+            const contentDiv = recipeDiv.querySelector('.procedure');
+            const currentContent = contentDiv.textContent;
+
+            // Replace procedure with a textarea
+            const textarea = document.createElement('textarea');
+            textarea.className = 'form-control';
+            textarea.value = currentContent;
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(textarea);
+
+            // Hide edit button and show save button
+            this.style.display = 'none';
+            recipeDiv.querySelector('.save-btn').style.display = 'inline-block';
+
+            // Save
+            recipeDiv.querySelector('.save-btn').addEventListener('click', function() {
+                const newContent = textarea.value;
+                const postId = recipeDiv.dataset.postId;
+
+                // Send AJAX request to save
+                fetch(`/edit_recipe/${postId}`, {
+                    method: 'POST',
+                    headers: {
+// With this attribute, form data is encoded into a string of key-value pairs where key-value pairs are separated by & and keys and values are separated by = (ex. name=Sara&age=27)
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: `procedure=${encodeURIComponent(newContent)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        contentDiv.textContent = data.procedure;
+                        textarea.remove();
+                        recipeDiv.querySelector('.edit-btn').style.display = 'inline-block';
+                        this.style.display = 'none';
+                    } else {
+                        alert('Error saving post: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
+                });
+            });
+        });
+    });
+});

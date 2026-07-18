@@ -2,18 +2,6 @@
 {% load static %}
 
 {% block body %}
-<!-- Favourite buttons 
-{% if user.is_authenticated %}
-<div class="d-flex justify-content-end mb-3">
-<form method="POST" action="{% url 'recipes' recipes.id %}">
-    {% csrf_token %}
-    {% if is_fav %}
-        <button type="submit" class="btn btn-danger btn-sm">Remove from favourites</button>
-    {% else %}
-        <button type="submit" class="btn btn-success btn-sm">Add to favourites</button>
-    {% endif %}
-</form>
-{% endif %}-->
 
 <!-- Image and details (shown side by side) -->
 <div class="row">
@@ -21,8 +9,24 @@
     <img class="card-img-top recipe-image" alt="{{ recipes.title }}" height="400px"{% if recipes.url %} src="{{ recipes.url }}" {% else %} src="{{ recipes.image.url }}" {% endif %}>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between">
         <h2>{{ recipes.title }}</h2>
+        <!-- Favourite buttons -->
+            {% if user.is_authenticated %}
+            <div class="top-0 right-0">
+            <form method="POST" action="{% url 'recipes' recipes.id %}">
+                {% csrf_token %}
+                {% if is_fav %}
+                    <button type="submit" class="btn btn-danger btn-sm">Remove from favourites</button>
+                {% else %}
+                    <button type="submit" class="btn btn-success btn-sm">Add to favourites</button>
+                {% endif %}
+            </form>
+            </div>
+            {% endif %}
+        </div>
+
         <div class="mb-2">
             {% for dish in recipes.dish.all %}
             <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
@@ -44,10 +48,20 @@
             {% endfor %}
         </ul>
     </div>
-    </div>
 </div>
 <br>
+
+<div class="d-flex justify-content-between">
 <h4>Procedure:</h4>
-<p>{{ recipes.procedure }}</p>
+<!-- Edit button (to implement only for Prociona) -->
+<!-- {% if request.user == post.user %} -->
+<div class="edit-save">
+    <button class="edit-btn btn btn-outline-secondary">Edit</button>
+    <!-- Save button is hidden by default (with CSS) and shown when required (with JavaScript)-->
+    <button class="save-btn btn btn-outline-secondary">Save</button>
+</div>
+<!--{% endif %}-->
+</div>
+<p class="procedure">{{ recipes.procedure }}</p>
 
 {% endblock %}

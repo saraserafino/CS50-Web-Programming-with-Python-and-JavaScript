@@ -6,18 +6,32 @@
 {% if favourites %}
     <div class="row mx-3">
     {% for fav in favourites %}
-        <div class="card mx-3" style="width: 15rem;">
-            <a href="{% url 'recipes' fav.id %}" class="text-decoration-none text-dark">
-                <img class="card-img-top" src="{{ fav.image }}" alt="{{ fav.title }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ fav.title }}</h5>
-                    <p class="card-text">{{ fav.procedure|truncatechars:100 }}</p>
-                    <p><strong>Status:</strong> {% if fav.is_active %}Active{% else %}Closed{% endif %}</p>
-                </div>
-            </a>
+    <div class="card mx-3">
+        <!-- Clicking on a recipe takes user to its specific page -->
+        <a href="{% url 'recipes' id=fav.id %}" class="text-decoration-none text-dark">
+        <div class="recipe-image-container">
+        <img class="card-img-top recipe-image" alt="{{ fav.title }}" {% if fav.url %} src="{{ fav.url }}" {% else %} src="{{ fav.image.url }}" {% endif %}>
         </div>
+        <div class="card-body">
+        <h5 class="card-title">{{ fav.title }}</h5>
+        </a>
+
+        <div class="mb-2">
+            {% for dish in fav.dish.all %}
+            <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                {{ dish }}</span></a>
+            {% endfor %}
+            {% for label in fav.label.all %}
+            <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                {{ label }}</span></a>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+        <div class="alert alert-warning">You do not have any favourite recipes.</div>
     {% endfor %}
     </div>
+
 {% else %}
     <div class="alert alert-warning">You do not have any favourite recipes.</div>
 {% endif %}

@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 import random
@@ -204,7 +204,32 @@ def search(request):
         "recipes": recipes,
     })
 
-## STILL TO IMPLEMENT THE RANDOM PAGE
 def random_recipe(request):
-    random_entry = random.choice(recipes)
-    return recipes(request, random_entry)
+    all_recipes = Recipe.objects.all()
+    if all_recipes.exists():
+        random_recipe = random.choice(all_recipes)
+        return redirect('recipes', id=random_recipe.id)
+    else: # If no recipes exist, redirect to the index page
+        return redirect('index')
+
+@login_required ## Working on this
+def edit_recipe(request, recipe_id):
+    if request.method == "POST":
+        try:
+            recipe = Recipe.objects.get(pk=recipe_id)
+        except Recipe.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Recipe not found."}, status=404)
+
+        # Check if the logged-in user is the owner of the recipe (in realtà voglio fare che solo Prociona può modificare)
+        #if request.user == recipe.user:
+        new_procedure = request.POST.get("procedure", "").strip()
+        if new_procedure:
+            recipe.procedure = new_procedure
+            recipe.save()
+            return JsonResponse({"success": True, "procedure": recipe.procedure})
+        else:
+            return JsonResponse({"success": False, "error": "Procedure cannot be empty."}, status=400)
+        #else:
+        #    return JsonResponse({"success": False, "error": "You are not the author of this recipe."}, status=403)
+
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)

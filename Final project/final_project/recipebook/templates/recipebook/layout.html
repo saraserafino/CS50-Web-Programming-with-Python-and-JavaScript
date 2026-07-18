@@ -26,6 +26,9 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'index' %}">Recipes</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'random_recipe' %}">Random recipe</a>
+            </li>
             {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'favourites' %}">Favourite recipes</a>
