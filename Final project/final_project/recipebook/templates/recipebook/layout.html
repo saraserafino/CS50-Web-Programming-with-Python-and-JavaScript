@@ -2,75 +2,99 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>{% block title %}Le prelibatezze della prociona{% endblock %}</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet"/>
-        <link href="{% static 'recipebook/styles.css' %}" rel="stylesheet">
-    </head>
-    <body>
-        <h1>Le prelibatezze della prociona</h1>
-        <div>
-            {% if user.is_authenticated %}
-                Signed in as <strong>{{ user.username }}</strong>.
-            {% else %}
-                Not signed in.
-            {% endif %}
-        </div>
-        <ul class="nav">
-            <li class="nav-item">
-                <!-- At the moment this is index, when I'll have the meal plan I will explain both in the home-->
-                <a class="nav-link" href="{% url 'index' %}">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'index' %}">Recipes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'random_recipe' %}">Random recipe</a>
-            </li>
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'favourites' %}">Favourite recipes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_recipe' %}">Add recipe</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
-                </li>
-            {% endif %}
-        </ul>
-        <hr>
 
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <!-- Manually map Django's error to Bootstrap's danger class (otherwise it was not coloured)-->
-                {% if message.tags == "error" %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {% else %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {% endif %}
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        </div>
+<head>
+    <title>{% block title %}Le prelibatezze della prociona{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.min.css" rel="stylesheet"/>
+    <link href="{% static 'recipebook/styles.css' %}" rel="stylesheet">
+</head>
+
+<body>
+<h1>Le prelibatezze della prociona</h1>
+<div>
+    {% if user.is_authenticated %}
+        Signed in as <strong>{{ user.username }}</strong>.
+    {% else %}
+        Not signed in.
+    {% endif %}
+</div>
+
+<div class="d-flex justify-content-between">
+<!-- Left navigation bar -->
+    <ul class="nav">
+        <li class="nav-item">
+            <!-- At the moment this is index, when I'll have the meal plan I will explain both in the home-->
+            <a class="nav-link" href="{% url 'index' %}">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Recipes</a>
+        </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'favourites' %}">Favourite recipes</a>
+            </li>
         {% endif %}
-        {% block body %}
-        {% endblock %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'random_recipe' %}">Random recipe</a>
+        </li>
+    </ul>
+
+<!-- Right navigation bar -->
+    <ul class="nav">
+        <!-- User can search for a recipe -->
+        <form action="{% url 'search' %}" method="get">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="8%"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z"/></svg>
+            <input type="text" name="q" autocomplete="off" placeholder="Search among recipes">
+            <button type="submit" class="btn-search btn-warning btn-sm">Search</button>
+        </form>
+
+        {% if user.is_superuser %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'add_recipe' %}">Add recipe</a>
+            </li>
+        {% endif %}
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+        </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+<hr>
+
+{% if messages %}
+<div class="messages">
+{% for message in messages %}
+<!-- Manually map Django's error to Bootstrap's danger class (otherwise it was not coloured)-->
+    {% if message.tags == "error" %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {% else %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+    {% endif %}
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endfor %}
+</div>
+{% endif %}
+
+{% block body %}
+{% endblock %}
 
 </body>
+
 {% block script %}
 <!-- Pass the CSRF token to JavaScript -->
 <script>const csrftoken = '{{ csrf_token }}';</script>

@@ -51,16 +51,14 @@
 </div>
 <br>
 
-<div class="d-flex justify-content-between">
+<div class="d-flex justify-content-between" data-recipe-id="{{ recipes.id }}">
 <h4>Procedure:</h4>
-<!-- Edit button (to implement only for Prociona) -->
-<!-- {% if request.user == post.user %} -->
-<div class="edit-save">
-    <button class="edit-btn btn btn-outline-secondary">Edit</button>
-    <!-- Save button is hidden by default (with CSS) and shown when required (with JavaScript)-->
-    <button class="save-btn btn btn-outline-secondary">Save</button>
-</div>
-<!--{% endif %}-->
+<!-- Edit button only for the super user -->
+    <div>
+        <button class="edit-btn btn btn-outline-secondary">Edit</button>
+        <!-- Save button is hidden by default (with CSS) and shown when required (with JavaScript)-->
+        <button class="save-btn btn btn-outline-secondary">Save</button>
+    </div>
 </div>
 <p class="procedure">{{ recipes.procedure }}</p>
 

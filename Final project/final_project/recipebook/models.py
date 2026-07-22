@@ -30,7 +30,6 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     title = models.CharField(max_length=50)
     procedure = models.CharField(max_length=10000)
-    ##user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recipes")
     # Image can be uploaded from files or url
     image = models.ImageField(upload_to="images/", blank=True, null=True)
     url = models.URLField(max_length=500, blank=True, null=True)

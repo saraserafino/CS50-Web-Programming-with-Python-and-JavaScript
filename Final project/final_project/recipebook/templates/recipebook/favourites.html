@@ -4,27 +4,30 @@
 {% block body %}
 <h2>Your favourites recipes</h2>
 {% if favourites %}
-    <div class="row mx-3">
+    <div class="row row-recipe row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 row-cols-xxl-5 g-3" id="recipes-container" data-initial-count="{{ recipes|length }}">
     {% for fav in favourites %}
-    <div class="card mx-3">
+    <div class="card h-100">
         <!-- Clicking on a recipe takes user to its specific page -->
         <a href="{% url 'recipes' id=fav.id %}" class="text-decoration-none text-dark">
+
         <div class="recipe-image-container">
         <img class="card-img-top recipe-image" alt="{{ fav.title }}" {% if fav.url %} src="{{ fav.url }}" {% else %} src="{{ fav.image.url }}" {% endif %}>
         </div>
+        
         <div class="card-body">
         <h5 class="card-title">{{ fav.title }}</h5>
         </a>
 
-        <div class="mb-2">
-            {% for dish in fav.dish.all %}
-            <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
-                {{ dish }}</span></a>
-            {% endfor %}
-            {% for label in fav.label.all %}
-            <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
-                {{ label }}</span></a>
-            {% endfor %}
+            <div class="mb-2">
+                {% for dish in fav.dish.all %}
+                <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                    {{ dish }}</span></a>
+                {% endfor %}
+                {% for label in fav.label.all %}
+                <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                    {{ label }}</span></a>
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% empty %}

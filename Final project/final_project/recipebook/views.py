@@ -3,17 +3,41 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
-import random
+from django.contrib.auth.decorators import login_required, user_passes_test
+import random, time
 from django.db.models import Q
 
 from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, MealPlan
 
 # Create your views here.
+
 def index(request):
     dishes = Dish.objects.all()
     labels = Label.objects.all()
-    recipes = Recipe.objects.all()
+    # Show recipes from newest (without infinite scrolling)
+    #recipes = Recipe.objects.all().order_by("id").reverse()
+
+    # Get start and end points for infinite scrolling
+    start = int(request.GET.get("start") or 0)
+    end = int(request.GET.get("end") or (start + 19))
+    # Fetch actual Recipe objects from the database
+    recipes = list(Recipe.objects.all().order_by("id").reverse()[start:end+1])
+    # Artificially delay speed of response
+    time.sleep(1)
+
+    # If this is an AJAX request, return JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        recipes_data = []
+        for recipe in recipes:
+            recipes_data.append({
+                'id': recipe.id,
+                'title': recipe.title,
+                'image_url': recipe.url if recipe.url else recipe.image.url,
+                'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
+                'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
+            })
+        return JsonResponse({'recipes': recipes_data})
+
     return render(request, "recipebook/index.html", {
         "dishes": dishes,
         "labels": labels,
@@ -70,7 +94,8 @@ def register(request):
     else:
         return render(request, "recipebook/register.html")
 
-@login_required
+# Add recipes, but only the super user can
+@user_passes_test(lambda u: u.is_superuser)
 def add_recipe(request):
     if request.method == "GET":
         all_dishes = Dish.objects.all()
@@ -167,18 +192,36 @@ def display_filters(request):
     # Default: all recipes, which is also base queryset for the filters
     recipes = Recipe.objects.all()
     # Filter recipes from list of possible multiple IDs
-    if request.method == "POST" or request.method == "GET":
-        dish_ids = request.POST.getlist("dish") if request.method == "POST" else request.GET.getlist("dish")
-        label_ids = request.POST.getlist("label") if request.method == "POST" else request.GET.getlist("label")
-        # Convert string IDs to integers
-        dish_ids = [int(id) for id in dish_ids] if dish_ids else []
-        label_ids = [int(id) for id in label_ids] if label_ids else []
-        if dish_ids:
-            recipes = recipes.filter(dish__id__in=dish_ids)
-        if label_ids:
-            recipes = recipes.filter(label__id__in=label_ids)
-        # Avoid duplicates if multiple filters match the same recipe
-        recipes = recipes.distinct()
+    #if request.method == "POST" or request.method == "GET":
+    dish_ids = request.POST.getlist("dish") if request.method == "POST" else request.GET.getlist("dish")
+    label_ids = request.POST.getlist("label") if request.method == "POST" else request.GET.getlist("label")
+    # Convert string IDs to integers
+    dish_ids = [int(id) for id in dish_ids] if dish_ids else []
+    label_ids = [int(id) for id in label_ids] if label_ids else []
+    if dish_ids:
+        recipes = recipes.filter(dish__id__in=dish_ids)
+    if label_ids:
+        recipes = recipes.filter(label__id__in=label_ids)
+    # Avoid duplicates if multiple filters match the same recipe
+    recipes = recipes.distinct()
+
+    # Handle AJAX requests for infinite scrolling
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        start = int(request.GET.get("start", 0))
+        end = int(request.GET.get("end", start + 19))
+        # Divide the filtered recipes
+        recipes = recipes.order_by("id").reverse()[start:end+1]
+
+        recipes_data = []
+        for recipe in recipes:
+            recipes_data.append({
+                'id': recipe.id,
+                'title': recipe.title,
+                'image_url': recipe.url if recipe.url else recipe.image.url,
+                'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
+                'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
+            })
+        return JsonResponse({'recipes': recipes_data})
 
     return render(request, "recipebook/index.html", {
         "recipes": recipes,
@@ -186,7 +229,7 @@ def display_filters(request):
         "labels": all_labels
     })
 
-# Function for searching a recipe
+# Search a recipe
 def search(request):
     query = request.GET.get("q", "").strip()
     if not query: # If no query, return all recipes
@@ -211,8 +254,9 @@ def random_recipe(request):
         return redirect('recipes', id=random_recipe.id)
     else: # If no recipes exist, redirect to the index page
         return redirect('index')
-
-@login_required ## Working on this
+    
+# Edit recipes, but only the super user can
+@user_passes_test(lambda u: u.is_superuser)
 def edit_recipe(request, recipe_id):
     if request.method == "POST":
         try:
@@ -220,8 +264,6 @@ def edit_recipe(request, recipe_id):
         except Recipe.DoesNotExist:
             return JsonResponse({"success": False, "error": "Recipe not found."}, status=404)
 
-        # Check if the logged-in user is the owner of the recipe (in realtà voglio fare che solo Prociona può modificare)
-        #if request.user == recipe.user:
         new_procedure = request.POST.get("procedure", "").strip()
         if new_procedure:
             recipe.procedure = new_procedure
@@ -229,7 +271,5 @@ def edit_recipe(request, recipe_id):
             return JsonResponse({"success": True, "procedure": recipe.procedure})
         else:
             return JsonResponse({"success": False, "error": "Procedure cannot be empty."}, status=400)
-        #else:
-        #    return JsonResponse({"success": False, "error": "You are not the author of this recipe."}, status=403)
 
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)

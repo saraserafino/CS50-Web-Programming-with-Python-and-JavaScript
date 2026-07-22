@@ -2,60 +2,57 @@
 {% load static %}
 
 {% block body %}
-    <h2>Recipes</h2>
-    <br>
-    <!-- User can search for a recipe -->
-    <form action="{% url 'search' %}" method="get">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="1.5%"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z"/></svg>
-        <input class="search" type="text" name="q" autocomplete="off" placeholder="Search among recipes">
-        <button type="submit" class="btn btn-warning btn-sm">Search</button>
-    </form>
+<h2>Recipes</h2>
+<br>
 
 <!-- User can filter the recipes, once done they are redirected to a page of filtered recipes. -->
-    <form action="{% url 'display_filters' %}" method="POST" class="my-3">
-        {% csrf_token %}
-        <label for="dish">Filter by dish:</label>
-        <select name="dish" id="dish" multiple class="chosen-select" data-placeholder="Dish type">
-            {% for dish in dishes %}
-                <option value="{{ dish.id }}">{{ dish.dish_name }}</option>
-            {% endfor %}
-        </select>
+<form action="{% url 'display_filters' %}" method="POST" class="my-3">
+    {% csrf_token %}
+    <label for="dish">Filter by dish:</label>
+    <select name="dish" id="dish" multiple class="chosen-select" data-placeholder="Dish type">
+        {% for dish in dishes %}
+            <option value="{{ dish.id }}">{{ dish.dish_name }}</option>
+        {% endfor %}
+    </select>
 
-        <label for="label">Filter by label:</label>
-        <select name="label" id="label" multiple class="chosen-select" data-placeholder="Label">
-            {% for label in labels %}
-                <option value="{{ label.id }}">{{ label.label_name }}</option>
-            {% endfor %}
-        </select>
+    <label for="label">Filter by label:</label>
+    <select name="label" id="label" multiple class="chosen-select" data-placeholder="Label">
+        {% for label in labels %}
+            <option value="{{ label.id }}">{{ label.label_name }}</option>
+        {% endfor %}
+    </select>
 
-        <button type="submit" class="btn btn-warning btn-sm">Apply filter</button>
-    </form>
-    
-    <div class="row mx-3">
-    {% for recipe in recipes %}
-        <div class="card mx-3">
-            <!-- Clicking on a recipe takes user to its specific page -->
-            <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
-            <div class="recipe-image-container">
-            <img class="card-img-top recipe-image" alt="{{ recipe.title }}" {% if recipe.url %} src="{{ recipe.url }}" {% else %} src="{{ recipe.image.url }}" {% endif %}>
-            </div>
-            <div class="card-body">
-            <h5 class="card-title">{{ recipe.title }}</h5>
-            </a>
-            <div class="mb-2">
-                {% for dish in recipe.dish.all %}
-                <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
-                    {{ dish }}</span></a>
-                {% endfor %}
-                {% for label in recipe.label.all %}
-                <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
-                    {{ label }}</span></a>
-                {% endfor %}
-            </div>
-            </div>
-        </div>
-    {% empty %}
-        <div class="alert alert-warning">No recipes meet these criteria &#128542</div>
-    {% endfor %}
+    <button type="submit" class="btn btn-warning btn-sm">Apply filter</button>
+</form>
+
+<div class="row row-recipe row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 row-cols-xxl-5 g-3" id="recipes-container" data-initial-count="{{ recipes|length }}">
+{% for recipe in recipes %}
+<div class="card h-100">
+    <!-- Clicking on a recipe takes user to its specific page -->
+    <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
+
+    <div class="recipe-image-container">
+    <img class="card-img-top recipe-image" alt="{{ recipe.title }}" {% if recipe.url %} src="{{ recipe.url }}" {% else %} src="{{ recipe.image.url }}" {% endif %}>
     </div>
+
+    <div class="card-body">
+    <h5 class="card-title">{{ recipe.title }}</h5>
+    </a>
+
+        <div class="mb-2">
+            {% for dish in recipe.dish.all %}
+            <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                {{ dish }}</span></a>
+            {% endfor %}
+            {% for label in recipe.label.all %}
+            <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                {{ label }}</span></a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% empty %}
+    <div class="alert alert-warning">No recipes meet these criteria &#128542</div>
+{% endfor %}
+</div>
 {% endblock %}
