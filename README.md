@@ -23,9 +23,7 @@ A [video](https://www.youtube.com/watch?v=cDCqG4iPd2c) demonstrates the web app'
     - Using JavaScript, you should asynchronously let the server know to update the like count (as via a call to fetch) and then update the post’s like count displayed on the page, without requiring a reload of the entire page.
 
 ## Final project
-Students are required to build a web application of their own, whose nature is up to them (but subject to a few [requirements](https://cs50.harvard.edu/web/projects/final/capstone/)).
-> [!NOTE]
-> Work in progress...
+Students are required to build a web application of their own, whose nature is up to them (but subject to a few [requirements](https://cs50.harvard.edu/web/projects/final/capstone/)). A more detailed README is present in the specific folder.
 
 > [!WARNING]
 > If you are taking the course, take into consideration [CS50's Academic Honesty rules](https://cs50.harvard.edu/web/honesty/#policy) before reading these files. This repository is merely intended to show to potential recruiters the Web Programming skills I acquired.
