@@ -1,15 +1,22 @@
 # Final project: recipe book & meal plan
 > [!NOTE]
-> work in progress, for now the recipe book is almost finished.
+> Recipe book is finished, meal plan to do.
 
-This web application implements an online recipe book, where recipes can be filtered by dish (protein, carbohydrate, vegetables, dessert, sauce), label (vegan, vegetarian, gluten-free) and if already approved by the super user or not. Moreover, it is possible to search for recipes where the query appears in the title, ingredients or procedure. For every recipe, it is possibile to increase or decrease the resulting portion, automatically obtaining the new proportion of the ingredients.<br>
-Users can log in to save a recipe and generate a meal plan, whereas the super user can also add new recipes and modify them.
+This web application is an online recipe book designed to help users discover, save, and manage recipes. Users can filter by recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
+For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility.
 
 ## Distinctiveness and Complexity
-The project interface has some initial similarities with the [e-commerce project](https://cs50.harvard.edu/web/projects/2/commerce/) in the possibility to filter items per category and add them to a watchlist (here the favourite recipes). For this reason, some additions were made, namely at the end of the page of a single recipe, other similar are recommended.<br>
-The most distinctive and complex implemented feature is the creation of a balanced **meal plan**, either for a day or a week. The user can:
+While the project interface of the recipe book has some front-end similarities with the [e-commerce project](https://cs50.harvard.edu/web/projects/2/commerce/) (e.g., filtering items by category and adding them to a watchlist), it introduces several unique features and complexities to differentiate itself:
+
+1. Infinite scroll: recipes load dynamically as the user scrolls, improving the browsing experience and reducing page load times.
+2. Similar Recipe Recommendations: at the end of each recipe page, the application suggests a maximum of 4 similar recipes based on shared dish labels and the first 3 ingredients. This feature enhances user engagement by helping them discover new recipes.
+3. Portion scaling: users can increase or decrease the portion size of a recipe, and the ingredient quantities are automatically recalculated to maintain the correct proportions.
+4. Ingredient checklist: users can temporarily check off ingredients as they add them, acting as a reminder for what has already been included.
+
+Above all, the most distinctive and complex implemented feature is the creation of a balanced **meal plan**, either for a day or a week. The user can:
 - Choose random generation or
 - Select the ingredients they already have and decide whether to use only them or possibly buy others;
+- Specify a label (vegan, vegetarian, gluten-free);
 - Specify whether they would like to prepare more dinner to have lunch the day after;
 - Specify how many new recipes they want to include.
 
@@ -19,16 +26,57 @@ When presented the plan:
 
 Then, an interactive grocery shopping list is presented, enabling the user to tick off food they already have; the rest of the list can be saved as a text to export.
 
+### Back-End Complexity
+Although the design may seem similar to previous projects (e.g., search functionality and random page generation), the back-end logic is significantly more complex:
+- **[Many-to-Many Relationships](https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ManyToManyField)**: the application uses **Django's `ManyToManyField`** to relate recipes to dishes, labels, ingredients, and users (for favorites).
+- **[Intermediary Model](https://docs.djangoproject.com/en/5.0/topics/db/models/#intermediary-manytomany)**: An **intermediary model (`RecipeIngredient`)** is used to store additional details (e.g., quantity and unit of measure) for the relationship between recipes and ingredients.
+- **Django Admin Customization**: the **[`TabularInline`](https://docs.djangoproject.com/en/6.0/ref/contrib/admin/#django.contrib.admin.TabularInline)** class is used to edit `RecipeIngredient` directly on the `Recipe` admin page, streamlining data management.
+- **Image Uploads**: users can upload images for recipes, which required configuring **Django's [`ModelForm`](https://www.geeksforgeeks.org/python/python-uploading-images-in-django/)** in `forms.py`, configuring `settings.py`, and `urls.py` to handle media files.
+- **Data Migration**: **[Django Data Migration](https://docs.djangoproject.com/en/6.0/topics/migrations/#data-migrations)** was used to add default values for dishes and labels, ensuring a clean, permanent and version-controlled way to populate the database. Whereas for the ingredients, [Fixtures](https://docs.djangoproject.com/en/6.0/topics/db/fixtures/) are generated loading a JSON file; this method requires manual loading that is automated in the app's setup *(not done yet)*.
+
+## Technologies Used
+- **Front-End**:
+  - HTML, CSS, JavaScript
+  - [Bootstrap](https://getbootstrap.com/) for responsive design
+  - [Chosen](https://harvesthq.github.io/chosen/) for user-friendly multi-select dropdowns
+- **Back-End**:
+  - [Django](https://www.djangoproject.com/) (Python web framework)
+  - [Django Admin](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/) for backend management
+  - [SQLite](https://www.sqlite.org/index.html) (default Django database)
+- **Deployment**:
+  - (Add your deployment platform here, e.g., Heroku, AWS, or PythonAnywhere)
+
 ## Code organisation
 ### Models
-Besides a model for User and Recipe, models for filtering by Dish, Label and Ingredients are defined and related to the recipe as a [many-to-many field](https://docs.djangoproject.com/en/5.0/ref/models/fields/#django.db.models.ManyToManyField), as multiple of them can be used in more recipes.<br>
-Inside the Recipe model, saving a recipe as favourite is also a many-to-many field, as different users have this option. The label for "new recipes" that have not been tried yet is a boolean, set as False by default. The base portion for a recipe is a positive integer, used to scale the ingredients accordingly.<br>
-An interesting addition to the course material is the use of an [intermediary model of a many-to-many relationship](https://docs.djangoproject.com/en/5.0/topics/db/models/#intermediary-manytomany) called RecipeIngredient to relate an ingredient with a recipe, adding details of an ingredient such as its quantity and unit of measure. When registering the models to the Django admin interface, [Django Inline Admin TabularInline](https://docs.djangoproject.com/en/6.0/ref/contrib/admin/#django.contrib.admin.TabularInline) is used on RecipeIngredient to edit it on the same page as the parent model, that is Recipe.<br>
-When adding a recipe, it is possible to upload an image, hence [Django's ModelForm](https://www.geeksforgeeks.org/python/python-uploading-images-in-django/) is employed in forms.py after configuring settings.py and urls.py for serving media.
-### Other
-The plugin [Chosen](https://harvesthq.github.io/chosen/) is employed to render selection of filters more user-friendly.<br>
-[Django Data Migration](https://docs.djangoproject.com/en/6.0/topics/migrations/#data-migrations) has been performed for adding default values for dishes and labels in the cleanest way, as it ensures a permanent, version-controlled migration of data. Whereas for the ingredients, [Fixtures](https://docs.djangoproject.com/en/6.0/topics/db/fixtures/) are generated loading a JSON file; this method requires manual loading that is automated in the app's setup *(not done yet)*.
+The application includes the following models:
+- **`User`**: extends Django's `AbstractUser` to support user authentication and favorites.
+- **`Dish`**: represents the type of dish (e.g., protein, carbohydrate, vegetables, sauce, dessert).
+- **`Label`**: represents dietary labels (e.g., vegan, vegetarian, gluten-free).
+- **`Ingredient`**: stores ingredient names (e.g., tofu, onion).
+- **`Recipe`**: the core model, which includes:
+  - Fields for title, procedure, image, favourite and approval status (`is_new`).
+  - **Many-to-Many Relationships** with `Dish`, `Label`, `Ingredient`, and `User` (for favorites).
+  - A **`base_portion`** field to define the default portion size.
+  - Methods for **listing ingredients** and **getting similar recipes**.
+- **`RecipeIngredient`**: an **intermediary model** for the many-to-many relationship between `Recipe` and `Ingredient`, storing **quantity** and **unit of measure**.
+- **`MealPlan`**: allows users to save recipes to a meal plan.
 
+### Views and Templates
+- **`index`**: displays all recipes with a badge for each type of dish and dietary label which redirects to a filtered index page when clicked.
+- **`infinite_scrolling`**: function to easily apply the infinite scroll to every page.
+- **`display_filters`**: filters recipes based on user-selected dishes, labels or approval status, returning the index page with applied filters.
+- **`recipes`**: shows a single recipe with the option to adjust portions and check off ingredients. At the end of the page, similar recipes are recommended.
+- **`random_recipe`**: randomly shows a single recipe.
+- **`favourites`**: displays the user's saved recipes.
+- **`search`**: search for recipes where the query is contained in the title, procedure or ingredients.
+- **`add_recipe`** and **`edit_recipe`**: only the super user can add new recipes and edit them.
+- **`meal_plan`**: allows users to create and manage meal plans.
+
+### Static Files
+- **CSS**: custom styles for the application, including responsive design.
+- **JavaScript**: handles dynamic features like chosen plugin, infinite scroll, portion scaling, ingredient checklists, recipe editing, adding and removing an ingredient when creating a recipe.
+- **Images**: uploaded recipe images are stored in the `media` directory.
+- 
 ## How to run
 ```bash
 python manage.py runserver
