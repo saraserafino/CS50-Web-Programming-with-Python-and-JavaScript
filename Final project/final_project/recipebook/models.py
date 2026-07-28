@@ -43,16 +43,34 @@ class Recipe(models.Model):
     # "New recipe" status for recipes that have not been tried yet
     is_new = models.BooleanField(default=False, help_text="Mark as new if you have not tried it yet.")
 
-    # With JavaScript it is possibile to increase the portion of a recipe, automatically obtaining the new proportion of the ingredients
+    # Use it with JavaScript to increase/decrease the portion of a recipe, automatically obtaining the new proportion of the ingredients
     base_portion = models.PositiveIntegerField(default=1, help_text="Base number of portions.")
 
     def ingredients_list(self):
+        """
+        Returns quantity and unit of measure for each ingredient of a recipe.
+        """
         return [{
             "quantity": ingredient.quantity,
             "unit": ingredient.unit,
             "name": ingredient.ingredient.ingredient_name}
             for ingredient in self.recipe_ingredients.all()
             ]
+
+    def get_similar_recipes(self, limit=4):
+        """
+        Returns a queryset of similar recipes based on shared ingredients and dishes.
+        """
+        # Get IDs of ingredients, dishes and labels for the current recipe
+        main_ingredients = self.recipe_ingredients.all()[:3]
+        ingredient_ids = [ingredient.ingredient.id for ingredient in main_ingredients]
+        dish_ids = self.dish.values_list('id', flat=True)
+
+        # Find recipes that share at least one ingredient, dish or label (excluding current recipe)
+        similar_recipes = Recipe.objects.filter(ingredient__in=ingredient_ids, dish__in=dish_ids).exclude(id=self.id).distinct()
+
+        # Order by newest and limit the results
+        return similar_recipes.order_by("-id")[:limit]
 
     def __str__(self):
         return self.title

@@ -78,4 +78,38 @@
 </div>
 <p class="procedure">{{ recipes.procedure }}</p>
 
+<!-- Recommend similar recipes based on the main ingredients and within the dish.
+To this scope, get_similar_recipes of the model Recipe is used, limiting to 4 recipes and first 3 ingredients. -->
+{% if similar_recipes %}
+<br><br>
+<h3>You might also like:</h3>
+<div class="row row-recipe row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 row-cols-xxl-5 g-3">
+    {% for recipe in similar_recipes %}
+    <div class="card h-100">
+        <a href="{% url 'recipes' id=recipe.id %}" class="text-decoration-none text-dark">
+
+        <div class="recipe-image-container">
+        <img class="card-img-top recipe-image" alt="{{ recipe.title }}" {% if recipe.url %} src="{{ recipe.url }}" {% else %} src="{{ recipe.image.url }}" {% endif %}>
+        </div>
+
+        <div class="card-body">
+        <h5 class="card-title">{{ recipe.title }}</h5>
+        </a>
+
+            <div class="mb-2">
+                {% for dish in recipe.dish.all %}
+                <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                    {{ dish }}</span></a>
+                {% endfor %}
+                {% for label in recipe.label.all %}
+                <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                    {{ label }}</span></a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% endblock %}

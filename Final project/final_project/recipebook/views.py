@@ -184,20 +184,22 @@ def favourites(request):
 
 # Display a recipe
 def recipes(request, id):
-    recipes_data = Recipe.objects.get(pk=id)
+    recipes = Recipe.objects.get(pk=id)
+    similar_recipes = recipes.get_similar_recipes(limit=4)
 
-    is_fav = request.user in recipes_data.favourites.all()
+    is_fav = request.user in recipes.favourites.all()
     if request.method == "POST":
         if is_fav: # Remove from favourites
-            recipes_data.favourites.remove(request.user)
+            recipes.favourites.remove(request.user)
         else: # Add to favourites
-            recipes_data.favourites.add(request.user)
+            recipes.favourites.add(request.user)
     # Update the status
-    is_fav = request.user in recipes_data.favourites.all()
+    is_fav = request.user in recipes.favourites.all()
 
     return render(request, "recipebook/recipes.html", {
-        "recipes": recipes_data,
-        "is_fav": is_fav
+        "recipes": recipes,
+        "is_fav": is_fav,
+        "similar_recipes": similar_recipes
     })
 
 # Display filtered recipes
