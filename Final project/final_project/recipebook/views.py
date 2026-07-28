@@ -11,21 +11,16 @@ from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, Mea
 
 # Create your views here.
 
-def index(request):
-    dishes = Dish.objects.all()
-    labels = Label.objects.all()
-    # Show recipes from newest (without infinite scrolling)
-    #recipes = Recipe.objects.all().order_by("id").reverse()
-
+def infinite_scrolling(request, recipes):
     # Get start and end points for infinite scrolling
     start = int(request.GET.get("start") or 0)
     end = int(request.GET.get("end") or (start + 19))
-    # Fetch actual Recipe objects from the database
-    recipes = list(Recipe.objects.all().order_by("id").reverse()[start:end+1])
+    # Slice the recipes
+    recipes = recipes[start:end+1]
     # Artificially delay speed of response
     time.sleep(1)
 
-    # If this is an AJAX request, return JSON
+    # Handle AJAX requests for infinite scrolling
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         recipes_data = []
         for recipe in recipes:
@@ -35,13 +30,26 @@ def index(request):
                 'image_url': recipe.url if recipe.url else recipe.image.url,
                 'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
                 'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
+                'is_new': recipe.is_new,
             })
-        return JsonResponse({'recipes': recipes_data})
+        return JsonResponse({'recipes': recipes_data, 'has_more': len(recipes) == (end - start + 1)})
+
+    return None
+
+def index(request):
+    dishes = Dish.objects.all()
+    labels = Label.objects.all()
+    # Show recipes from newest
+    recipes = Recipe.objects.all().order_by("id").reverse()
+
+    response = infinite_scrolling(request, recipes)
+    if response:
+        return response
 
     return render(request, "recipebook/index.html", {
         "dishes": dishes,
         "labels": labels,
-        "recipes": recipes,
+        "recipes": recipes[:20] # Load first 20 for initial page, then infinite_scrolling will work
     })
 
 def login_view(request):
@@ -164,9 +172,14 @@ def add_recipe(request):
 
 @login_required
 def favourites(request):
-    favourites = request.user.favourites.all()
+    favourites = request.user.favourites.all().order_by("id").reverse()
+
+    response = infinite_scrolling(request, favourites)
+    if response:
+        return response
+    
     return render(request, "recipebook/favourites.html", {
-        "favourites": favourites,
+        "favourites": favourites[:20],
     })
 
 # Display a recipe
@@ -193,17 +206,16 @@ def display_filters(request):
     all_labels = Label.objects.all()
     # Default: all recipes, which is also base queryset for the filters
     recipes = Recipe.objects.all()
+
     # Filter recipes from list of possible multiple IDs
     dish_ids = request.POST.getlist("dish") if request.method == "POST" else request.GET.getlist("dish")
     label_ids = request.POST.getlist("label") if request.method == "POST" else request.GET.getlist("label")
 
-    # Convert string IDs to integers
-    dish_ids = [int(id) for id in dish_ids] if dish_ids else []
-    label_ids = [int(id) for id in label_ids] if label_ids else []
-    if dish_ids:
-        recipes = recipes.filter(dish__id__in=dish_ids)
-    if label_ids:
-        recipes = recipes.filter(label__id__in=label_ids)
+    # Filter applying an AND logic (with "if dish_ids" it would have been an OR logic)
+    for dish_id in dish_ids:
+        recipes = recipes.filter(dish__id__in=dish_id)
+    for label_id in label_ids:
+        recipes = recipes.filter(label__id__in=label_id)
 
     # Filter recipes by new or approved
     recipe_status = request.POST.get("recipe_status") if request.method == "POST" else request.GET.get("recipe_status")
@@ -213,29 +225,14 @@ def display_filters(request):
         recipes = recipes.filter(is_new=False)
 
     # Avoid duplicates if multiple filters match the same recipe
-    recipes = recipes.distinct()
+    recipes = recipes.distinct().order_by("id").reverse()
 
-    # Handle AJAX requests for infinite scrolling
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        start = int(request.GET.get("start", 0))
-        end = int(request.GET.get("end", start + 19))
-        # Divide the filtered recipes
-        recipes = recipes.order_by("id").reverse()[start:end+1]
-
-        recipes_data = []
-        for recipe in recipes:
-            recipes_data.append({
-                'id': recipe.id,
-                'title': recipe.title,
-                'image_url': recipe.url if recipe.url else recipe.image.url,
-                'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
-                'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
-                'is_new': recipe.is_new,
-            })
-        return JsonResponse({'recipes': recipes_data})
+    response = infinite_scrolling(request, recipes)
+    if response:
+        return response
 
     return render(request, "recipebook/index.html", {
-        "recipes": recipes,
+        "recipes": recipes[:20],
         "dishes": all_dishes,
         "labels": all_labels
     })
@@ -253,9 +250,13 @@ def search(request):
             Q(recipe_ingredients__ingredient__ingredient_name__icontains=query)
         ).distinct() # distinct() avoids duplicate recipes
 
+    response = infinite_scrolling(request, recipes)
+    if response:
+        return response
+
     return render(request, "recipebook/search_results.html", {
         "query": query,
-        "recipes": recipes,
+        "recipes": recipes[:20],
     })
 
 def random_recipe(request):

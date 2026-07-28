@@ -235,6 +235,10 @@ function load() {
         if (data.recipes.length > 0) {
             // Add new recipes to the DOM
             data.recipes.forEach(add_recipe_js);
+            // Stop fetching if no more recipes are available
+            if (!data.has_more) {
+                window.onscroll = null;
+            }
         } else {
             // No more recipes to load
             window.onscroll = null;
