@@ -113,3 +113,9 @@ To this scope, get_similar_recipes of the model Recipe is used, limiting to 4 re
 {% endif %}
 
 {% endblock %}
+
+{% block script %}
+<!-- Pass the CSRF token to JavaScript -->
+<script>const csrftoken = '{{ csrf_token }}';</script>
+<script src="{% static 'recipebook/recipes.js' %}"></script>
+{% endblock %}
