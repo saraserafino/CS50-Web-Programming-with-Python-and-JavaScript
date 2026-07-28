@@ -15,6 +15,7 @@ urlpatterns = [
     path("search/", views.search, name="search"),
     path("random_recipe", views.random_recipe, name="random_recipe"),
     path("edit_recipe/<int:recipe_id>", views.edit_recipe, name="edit_recipe"),
+
 ]
 
 # Ensures that media files are served during development

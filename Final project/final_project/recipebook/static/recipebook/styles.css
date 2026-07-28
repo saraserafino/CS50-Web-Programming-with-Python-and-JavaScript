@@ -79,6 +79,7 @@ a:hover {
 }
 .badge-new{
     background-color: rgb(255, 156, 255);
+    color: rgb(55, 47, 42);
 }
 
 form[action*="/search/"] {

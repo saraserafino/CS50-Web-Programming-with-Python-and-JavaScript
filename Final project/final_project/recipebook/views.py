@@ -172,6 +172,7 @@ def favourites(request):
 # Display a recipe
 def recipes(request, id):
     recipes_data = Recipe.objects.get(pk=id)
+
     is_fav = request.user in recipes_data.favourites.all()
     if request.method == "POST":
         if is_fav: # Remove from favourites
@@ -180,6 +181,7 @@ def recipes(request, id):
             recipes_data.favourites.add(request.user)
     # Update the status
     is_fav = request.user in recipes_data.favourites.all()
+
     return render(request, "recipebook/recipes.html", {
         "recipes": recipes_data,
         "is_fav": is_fav
@@ -192,9 +194,9 @@ def display_filters(request):
     # Default: all recipes, which is also base queryset for the filters
     recipes = Recipe.objects.all()
     # Filter recipes from list of possible multiple IDs
-    #if request.method == "POST" or request.method == "GET":
     dish_ids = request.POST.getlist("dish") if request.method == "POST" else request.GET.getlist("dish")
     label_ids = request.POST.getlist("label") if request.method == "POST" else request.GET.getlist("label")
+
     # Convert string IDs to integers
     dish_ids = [int(id) for id in dish_ids] if dish_ids else []
     label_ids = [int(id) for id in label_ids] if label_ids else []
@@ -202,6 +204,14 @@ def display_filters(request):
         recipes = recipes.filter(dish__id__in=dish_ids)
     if label_ids:
         recipes = recipes.filter(label__id__in=label_ids)
+
+    # Filter recipes by new or approved
+    recipe_status = request.POST.get("recipe_status") if request.method == "POST" else request.GET.get("recipe_status")
+    if recipe_status == "new":
+        recipes = recipes.filter(is_new=True)
+    elif recipe_status == "approved":
+        recipes = recipes.filter(is_new=False)
+
     # Avoid duplicates if multiple filters match the same recipe
     recipes = recipes.distinct()
 
@@ -220,6 +230,7 @@ def display_filters(request):
                 'image_url': recipe.url if recipe.url else recipe.image.url,
                 'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
                 'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
+                'is_new': recipe.is_new,
             })
         return JsonResponse({'recipes': recipes_data})
 
@@ -254,7 +265,7 @@ def random_recipe(request):
         return redirect('recipes', id=random_recipe.id)
     else: # If no recipes exist, redirect to the index page
         return redirect('index')
-    
+
 # Edit recipes, but only the super user can
 @user_passes_test(lambda u: u.is_superuser)
 def edit_recipe(request, recipe_id):

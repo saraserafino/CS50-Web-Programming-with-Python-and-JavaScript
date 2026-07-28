@@ -37,14 +37,30 @@
                 {{ label }}</span></a>
             {% endfor %}
             {% if recipes.is_new %}
-            <span class="badge badge-pill badge-new me-1">This recipe hasn't been tried by Prociona yet</span>
+            <a href="{% url 'display_filters' %}?recipe_status=new"><span class="badge badge-pill badge-new me-1">
+                This recipe hasn't been approved by Prociona yet</span></a>
             {% endif %}
         </div>
+
         <br><br>
-        <h4>Ingredients:</h4>
+        <div class="d-flex align-items-center mb-2">
+            <h4>Ingredients for
+                <span id="portion-value" data-base-portion="{{ recipes.base_portion }}">{{ recipes.base_portion }}</span>
+                portion(s):</h4>
+            <!-- Decrease and increase portion -->
+            <button id="decrease-portion" class="btn btn-sm btn-outline-danger">-</button>
+            <button id="increase-portion" class="btn btn-sm btn-outline-success">+</button>
+        </div>
         <ul class="list-group">
             {% for ingredient in recipes.ingredients_list %}
-            <li class="list-group-item"><input type="checkbox">  {{ ingredient }}</li>
+            <li class="list-group-item"><input type="checkbox">
+                {% if ingredient.unit == "by heart"%} <!-- neither quantity nor unit is displayed -->
+                {% else%}
+                <span id="ingredient-quantity" class="ingredient-quantity" data-original-quantity="{{ ingredient.quantity }}">{{ ingredient.quantity }}</span>
+                {{ ingredient.unit }} of
+                {% endif %}
+                {{ ingredient.name }}
+            </li>
             {% endfor %}
         </ul>
     </div>

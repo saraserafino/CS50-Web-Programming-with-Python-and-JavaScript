@@ -95,6 +95,53 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Portion multiplier
+document.addEventListener('DOMContentLoaded', function() {
+    const decreaseBtn = document.getElementById('decrease-portion');
+    const increaseBtn = document.getElementById('increase-portion');
+    const portionValue = document.getElementById('portion-value');
+    const ingredientsList = document.querySelector('.list-group');
+
+    // Get the base portion from the data attribute
+    const originalBasePortion = parseInt(portionValue.dataset.basePortion);
+    let currentPortion = originalBasePortion;
+
+    // Decrease and increase portion
+    decreaseBtn.addEventListener('click', function() {
+        if (currentPortion > 1) {
+            currentPortion--;
+            updatePortionDisplay();
+        }
+    });
+    increaseBtn.addEventListener('click', function() {
+        currentPortion++;
+        updatePortionDisplay();
+    });
+
+    // Update the displayed quantities and multiplier
+    function updatePortionDisplay() {
+        portionValue.textContent = currentPortion;
+        // Calculate the scaling factor
+        const scalingFactor = currentPortion / originalBasePortion;
+        // Update each ingredient's quantity
+        const ingredientItems = ingredientsList.querySelectorAll('li');
+        ingredientItems.forEach(item => {
+            const quantitySpan = item.querySelector('.ingredient-quantity');
+            if (quantitySpan) {
+                const originalQuantity = parseFloat(quantitySpan.dataset.originalQuantity);
+                const newQuantity = originalQuantity * scalingFactor;
+                // Remove the .0 if integer
+                if (Number.isInteger(newQuantity)) {
+                    quantitySpan.textContent = newQuantity;
+                } else {
+                    quantitySpan.textContent = newQuantity.toFixed(1);
+                }
+            }
+        });
+    }
+    updatePortionDisplay();
+});
+
 // Infinite scrolling
 // Start with first recipes and load 20 per time when the DOM loads
 let counter = document.querySelectorAll('#recipes-container > .card').length;

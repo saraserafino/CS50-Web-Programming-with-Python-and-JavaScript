@@ -43,24 +43,16 @@ class Recipe(models.Model):
     # "New recipe" status for recipes that have not been tried yet
     is_new = models.BooleanField(default=False, help_text="Mark as new if you have not tried it yet.")
 
-    # It is possibile to increase the portion of a recipe, automatically obtaining the new proportion of the ingredients
+    # With JavaScript it is possibile to increase the portion of a recipe, automatically obtaining the new proportion of the ingredients
     base_portion = models.PositiveIntegerField(default=1, help_text="Base number of portions.")
 
-    def scale_ingredients(self, new_portion):
-        scaling_factor = new_portion / self.base_portion
-        scaled_ingredients = []
-        for single_ingredient in self.recipe_ingredients.all():
-            scaled_quantity = single_ingredient.quantity * scaling_factor
-            scaled_ingredients.append({
-                "ingredient": single_ingredient.ingredient.ingredient_name,
-                "quantity": scaled_quantity,
-                "unit": single_ingredient.unit,
-            })
-        return scaled_ingredients
-
     def ingredients_list(self):
-        return [f"{ingredient.quantity} {ingredient.unit} of {ingredient.ingredient.ingredient_name}"
-                for ingredient in self.recipe_ingredients.all()]
+        return [{
+            "quantity": ingredient.quantity,
+            "unit": ingredient.unit,
+            "name": ingredient.ingredient.ingredient_name}
+            for ingredient in self.recipe_ingredients.all()
+            ]
 
     def __str__(self):
         return self.title

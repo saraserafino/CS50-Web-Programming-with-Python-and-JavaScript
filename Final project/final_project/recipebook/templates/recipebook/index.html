@@ -6,7 +6,7 @@
 <br>
 
 <!-- User can filter the recipes, once done they are redirected to a page of filtered recipes. -->
-<form action="{% url 'display_filters' %}" method="POST" class="my-3">
+<form action="{% url 'display_filters' %}" method="GET" class="my-3">
     {% csrf_token %}
     <label for="dish">Filter by dish:</label>
     <select name="dish" id="dish" multiple class="chosen-select" data-placeholder="Dish type">
@@ -21,6 +21,16 @@
             <option value="{{ label.id }}">{{ label.label_name }}</option>
         {% endfor %}
     </select>
+
+    <!-- Radio buttons for new/approved Recipes -->
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="recipe_status" id="new_recipes" value="new">
+        <label class="form-check-label" for="new_recipes">New recipes only</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="recipe_status" id="approved_recipes" value="approved">
+        <label class="form-check-label" for="approved_recipes">Approved recipes only</label>
+    </div>
 
     <button type="submit" class="btn btn-warning btn-sm">Apply filter</button>
 </form>
