@@ -36,3 +36,6 @@ function removeIngredientRow(button) {
         alert("You must have at least one ingredient.");
     }
 }
+
+// Activate Chosen plugin for a more user-friendly selection of filters
+$(".chosen-select").chosen({width: "20%"})
