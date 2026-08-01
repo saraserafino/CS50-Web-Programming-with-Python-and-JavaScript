@@ -1,0 +1,64 @@
+{% extends "recipebook/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+<h1>Meal Plan Generator</h1>
+<p>Create a balanced meal plan for a day or a week.</p>
+{% if not user.is_authenticated %}<p><strong>Note: You must be logged in to save your meal plan.</strong></p>{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <label>Generation Type:</label>
+        <div class="form-check">
+            {% for choice in form.generation_type %}
+                <div class="form-check">
+                    {{ choice.tag }}
+                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                        {{ choice.choice_label }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Ingredient selection fields (hidden by default) -->
+    <div id="ingredient-selection" style="display: none;">
+        <div class="form-group">
+            <label>What ingredients would you like to use?</label>
+            {{ form.available_ingredients }}
+        </div>
+        <div class="form-group">
+            {{ form.use_only_available }}
+            <label for="{{ form.use_only_available.id_for_label }}">Use only available ingredients</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Labels:</label>
+        {{ form.label }}
+    </div>
+
+    <!-- Meal plan preferences -->
+    <div class="form-group">
+        {{ form.include_leftovers }}
+        <label for="{{ form.include_leftovers.id_for_label }}">Include leftovers for lunch the next day</label>
+    </div>
+    <div class="form-group">
+        <label>How many new recipes do you want ot try?</label>
+        {{ form.num_new_recipes }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Generate Meal Plan</button>
+</form>
+
+{% endblock %}
+
+{% block script %}
+<!-- Pass the CSRF token to JavaScript -->
+<script>const csrftoken = '{{ csrf_token }}';</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/harvesthq/chosen/gh-pages/chosen.jquery.min.js"></script>
+<script src="{% static 'mealplan/mealplan.js' %}"></script>
+{% endblock %}

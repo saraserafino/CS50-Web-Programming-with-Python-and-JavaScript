@@ -84,12 +84,3 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.quantity} {self.unit} of {self.ingredient.ingredient_name} for {self.recipe.title}"
-
-# Probably meal plan will be a model like this, but adjust later
-class MealPlan(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="meal_plans")
-    created_at = models.DateTimeField(auto_now_add=True)
-    recipes = models.ManyToManyField(Recipe, blank=True, related_name="meal_plans")
-
-    def __str__(self):
-        return f"{self.user.username}'s Meal Plan created at {self.created_at}"

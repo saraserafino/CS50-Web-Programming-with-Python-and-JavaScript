@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 import random, time
 from django.db.models import Q
 
-from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, MealPlan
+from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient
 
 # Create your views here.
 
@@ -51,6 +51,10 @@ def index(request):
         "labels": labels,
         "recipes": recipes[:20] # Load first 20 for initial page, then infinite_scrolling will work
     })
+
+# home.html explains how the recipe book and meal plan work
+def home(request):
+    return render(request, "recipebook/home.html")
 
 def login_view(request):
     if request.method == "POST":

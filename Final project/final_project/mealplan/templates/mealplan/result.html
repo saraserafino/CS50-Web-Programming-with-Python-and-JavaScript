@@ -1,0 +1,93 @@
+{% extends "recipebook/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+<h1>Your weekly meal plan</h1>
+
+<div class="row text-center mb-3">
+    <div class="col"><h4>Monday</h4></div>
+    <div class="col"><h4>Tuesday</h4></div>
+    <div class="col"><h4>Wednesday</h4></div>
+    <div class="col"><h4>Thursday</h4></div>
+    <div class="col"><h4>Friday</h4></div>
+    <div class="col"><h4>Saturday</h4></div>
+    <div class="col"><h4>Sunday</h4></div>
+</div>
+
+<!-- Lunches (first row) -->
+<div class="row mb-4">
+{% for meal_plan_recipe in meal_plan.meal_plan_recipes.all %}
+{% if forloop.counter0|divisibleby:2 %}
+    <div class="col mb-4">
+        <div class="card h-100">
+            <div class="card-header text-center">
+            <h5>Lunch</h5>
+            </div>
+            <div class="card-body text-center">
+                <a href="{% url 'recipes' id=meal_plan_recipe.recipe.id %}" class="text-decoration-none text-dark">
+                    <h6 class="card-title">{{ meal_plan_recipe.recipe.title }}</h6>
+                    <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                    <img class="card-img-top recipe-image" alt="{{ meal_plan_recipe.recipe.title }}" {% if meal_plan_recipe.recipe.url %} src="{{ meal_plan_recipe.recipe.url }}" {% else %} src="{{ meal_plan_recipe.recipe.image.url }}" {% endif %}>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endfor %}
+</div>
+
+<!-- Dinners (second row) -->
+<div class="row">
+{% for meal_plan_recipe in meal_plan.meal_plan_recipes.all %}
+{% if not forloop.counter0|divisibleby:2 %}
+<div class="col mb-4">
+    <div class="card h-100">
+        <div class="card-header text-center">
+            <h5>Dinner</h5>
+        </div>
+        <div class="card-body text-center">
+            <a href="{% url 'recipes' id=meal_plan_recipe.recipe.id %}" class="text-decoration-none text-dark">
+                <h6 class="card-title">{{ meal_plan_recipe.recipe.title }}</h6>
+                <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                <img class="card-img-top recipe-image" alt="{{ meal_plan_recipe.recipe.title }}" {% if meal_plan_recipe.recipe.url %} src="{{ meal_plan_recipe.recipe.url }}" {% else %} src="{{ meal_plan_recipe.recipe.image.url }}" {% endif %}>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+</div>
+
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'save_mealplan' meal_plan.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success mt-3">Save Meal Plan</button>
+    </form>
+{% else %}
+    <div class="alert alert-info mt-3">
+        <strong>Note:</strong> <a href="{% url 'login' %}">Log in</a> to save this meal plan to your account.
+    </div>
+{% endif %}
+
+<div class="mt-4">
+    <h2>Grocery List</h2>
+    <ul class="list-group">
+        {% for ingredient in grocery_list %}
+        <li class="list-group-item">
+            <input type="checkbox" class="mr-2"> {{ ingredient }}
+        </li>
+        {% endfor %}
+    </ul>
+    <button class="btn btn-primary mt-2">Export Grocery List</button>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<!-- Pass the CSRF token to JavaScript -->
+<script>const csrftoken = '{{ csrf_token }}';</script>
+<script src="{% static 'mealplan/mealplan.js' %}"></script>
+{% endblock %}

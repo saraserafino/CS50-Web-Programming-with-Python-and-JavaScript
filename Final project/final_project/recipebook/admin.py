@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django import forms
-from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient, MealPlan
+from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient
 
 # Register your models here.
 admin.site.register(User)
@@ -8,7 +8,6 @@ admin.site.register(Dish)
 admin.site.register(Label)
 admin.site.register(Ingredient)
 admin.site.register(RecipeIngredient)
-admin.site.register(MealPlan)
 
 # Since ingredient is a many-to-many field with RecipeIngredient as intermediary model, TabularInline is used to create an inline class and associate it with the parent model
 class RecipeIngredientInline(admin.TabularInline):
