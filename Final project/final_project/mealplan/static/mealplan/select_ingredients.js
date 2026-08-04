@@ -33,37 +33,3 @@ document.addEventListener('DOMContentLoaded', function() {
     // Call the function once to set the initial state
     toggleIngredientSelection();
 });
-
-// After generating the meal plan, the user can modify it
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle move up/down buttons
-    document.querySelectorAll('.move-up').forEach(button => {
-        button.addEventListener('click', function() {
-            const card = this.closest('.col-md-4');
-            const prevCard = card.previousElementSibling;
-            if (prevCard) {
-                card.parentNode.insertBefore(card, prevCard);
-            }
-        });
-    });
-
-    document.querySelectorAll('.move-down').forEach(button => {
-        button.addEventListener('click', function() {
-            const card = this.closest('.col-md-4');
-            const nextCard = card.nextElementSibling;
-            if (nextCard) {
-                card.parentNode.insertBefore(nextCard, card);
-            }
-        });
-    });
-
-    // Handle block button
-    document.querySelectorAll('.block').forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.card').classList.add('blocked');
-            this.textContent = 'Blocked';
-            this.classList.remove('btn-outline-success');
-            this.classList.add('btn-success');
-        });
-    });
-});

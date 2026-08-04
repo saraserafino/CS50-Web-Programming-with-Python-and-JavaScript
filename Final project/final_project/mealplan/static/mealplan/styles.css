@@ -1,0 +1,99 @@
+.sortable-drag{
+  opacity: 1
+}
+
+/* CSS style of sortable cards by TurboKit https://codepen.io/turbokit/pen/MYwRrMj */
+:root {
+  --bg: #ffffff;
+  --text: #ffffff;
+  --accent: #000000;
+  --radius: 0.5rem; /* Adjusted for smaller cards */
+  --shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
+  --anim: cubic-bezier(0, 0, 0.25, 1);
+}
+
+/* Base styles for cards */
+.cards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100vw;
+}
+.card-wrap {
+  width: 13rem; /* Adjust width as needed */
+  margin: 0.5rem;
+}
+.card {
+  height: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s var(--anim), box-shadow 0.2s var(--anim);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  background: beige;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  z-index: 10;
+  box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1);
+}
+.drag-handle:hover {
+  background: rgb(225, 132, 3);
+  transform: scale(1.1);
+}
+.locked .drag-handle {
+  cursor: not-allowed !important;
+}
+
+/* Iconify designs from https://icon-sets.iconify.design */
+.ic--outline-drag-indicator {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M11 18c0 1.1-.9 2-2 2s-2-.9-2-2s.9-2 2-2s2 .9 2 2m-2-8c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m0-6c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m6 4c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2m0 2c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2m0 6c-1.1 0-2 .9-2 2s.9 2 2 2s2-.9 2-2s-.9-2-2-2'/%3E%3C/svg%3E");
+  background-color: currentColor;
+  -webkit-mask-image: var(--svg);
+  mask-image: var(--svg);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.circum--lock {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23e18403' d='M17.44 9.33h-1.1V6.4a4.34 4.34 0 0 0-8.68 0v2.93h-1.1a2.5 2.5 0 0 0-2.5 2.5v7.61a2.507 2.507 0 0 0 2.5 2.5h10.88a2.507 2.507 0 0 0 2.5-2.5v-7.61a2.5 2.5 0 0 0-2.5-2.5M8.66 6.4a3.34 3.34 0 0 1 6.68 0v2.93H8.66Zm10.28 13.04a1.51 1.51 0 0 1-1.5 1.5H6.56a1.51 1.51 0 0 1-1.5-1.5v-7.61a1.5 1.5 0 0 1 1.5-1.5h10.88a1.5 1.5 0 0 1 1.5 1.5Z'/%3E%3Cpath fill='%23e18403' d='M13 14.95a.98.98 0 0 1-.5.86v1.5a.5.5 0 0 1-1 0v-1.5a.98.98 0 0 1-.5-.86a1 1 0 0 1 2 0'/%3E%3C/svg%3E");
+}
+.circum--unlock {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23e18403' d='M17.44 9.33h-1.1c0-.97.01-1.95 0-2.92a4.343 4.343 0 0 0-7.98-2.37c-.36.53.51 1.03.87.5a3.365 3.365 0 0 1 5.23-.39c1.04 1.11.88 2.57.88 3.96v1.22H6.56a2.5 2.5 0 0 0-2.5 2.5v7.61a2.507 2.507 0 0 0 2.5 2.5h10.88a2.507 2.507 0 0 0 2.5-2.5v-7.61a2.5 2.5 0 0 0-2.5-2.5m1.5 10.11a1.51 1.51 0 0 1-1.5 1.5H6.56a1.51 1.51 0 0 1-1.5-1.5v-7.61a1.5 1.5 0 0 1 1.5-1.5h10.88a1.5 1.5 0 0 1 1.5 1.5Z'/%3E%3Cpath fill='%23e18403' d='M13 14.95a.98.98 0 0 1-.5.86v1.5a.5.5 0 0 1-1 0v-1.5a.98.98 0 0 1-.5-.86a1 1 0 0 1 2 0'/%3E%3C/svg%3E");
+}
+.lock-handle {
+  position: absolute;
+  top: 1.7rem;
+  right: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
