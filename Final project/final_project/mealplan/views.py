@@ -4,6 +4,7 @@ from django.contrib import messages
 from .forms import MealPlanForm
 from .models import MealPlan, MealPlanRecipe
 from recipebook.models import Recipe, Dish, Label, Ingredient
+from collections import defaultdict
 import random
 
 # Create your views here.
@@ -117,17 +118,42 @@ def mealplan_result(request, meal_plan_id):
             return redirect('mealplan_home')
 
     # Get the grocery list (all ingredients for the meal plan's recipes)
-    grocery_list = []
+    ingredient_dict = defaultdict(lambda: {'quantity': 0, 'unit': ''})
     for meal_plan_recipe in meal_plan.meal_plan_recipes.all():
         for recipe_ingredient in meal_plan_recipe.recipe.recipe_ingredients.all():
-            grocery_item = f"{recipe_ingredient.quantity} {recipe_ingredient.unit} of {recipe_ingredient.ingredient.ingredient_name}"
-            if grocery_item not in grocery_list: # To avoid duplicates
-                grocery_list.append(grocery_item)
-            #else: ## Add the actual quantity to the previous quantity
+            key = (recipe_ingredient.ingredient.ingredient_name, recipe_ingredient.unit)
+            # If an ingredient is already present, sum the overall quantity depending on the unit
+            if key in ingredient_dict: # unit matches
+                if recipe_ingredient.unit == ingredient_dict[key]['unit']:
+                    ingredient_dict[key]['quantity'] += recipe_ingredient.quantity
+            else: # unit does not match
+                ingredient_dict[key]['quantity'] = recipe_ingredient.quantity
+                ingredient_dict[key]['unit'] = recipe_ingredient.unit
+    # Alphabetically sort the dictionary of ingredients and convert it
+    ingredient_dict = dict(sorted(ingredient_dict.items()))
+    grocery_list = [
+        {
+            'name': name,
+            'quantity': details['quantity'],
+            'unit': details['unit']
+        }
+        for (name, unit), details in ingredient_dict.items()
+    ]
+
+    # Generate the plain-text grocery list to later export it
+    grocery_text = []
+    for ingredient in grocery_list:
+        if ingredient["unit"] == "by heart":
+            grocery_text.append(ingredient["name"])
+        else:
+            quantity = int(ingredient["quantity"]) if ingredient["quantity"] % 1 == 0 else ingredient["quantity"]
+            grocery_text.append(f"{quantity} {ingredient["unit"]} of {ingredient["name"]}")
+    grocery_text_str = "\n".join(grocery_text)
 
     return render(request, 'mealplan/result.html', {
         'meal_plan': meal_plan,
         'grocery_list': grocery_list,
+        'grocery_text': grocery_text_str
     })
 
 @login_required

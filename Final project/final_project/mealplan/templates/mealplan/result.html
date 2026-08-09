@@ -5,71 +5,30 @@
 
 <h1>Your weekly meal plan</h1><br>
 
-<div class="row text-center mb-3">
-    <div class="col"><h4>Monday</h4></div>
-    <div class="col"><h4>Tuesday</h4></div>
-    <div class="col"><h4>Wednesday</h4></div>
-    <div class="col"><h4>Thursday</h4></div>
-    <div class="col"><h4>Friday</h4></div>
-    <div class="col"><h4>Saturday</h4></div>
-    <div class="col"><h4>Sunday</h4></div>
-</div>
+<div class="row text-center mb-3" id="days-header"></div>
 
-<div class="cards" id="card-sortable">
-    <div class="row">
-    {% for meal_plan_recipe in meal_plan.meal_plan_recipes.all %}
-    {% if forloop.counter0|divisibleby:2 %}
-        <div class="col mb-4 card-wrap">
-            <div class="card h-100">
-                <div class="card-header text-center">
-                <h5>Lunch</h5>
-                </div>
-                <div class="card-body text-center" data-id="{{ forloop.counter0 }}">
-                    <a href="{% url 'recipes' id=meal_plan_recipe.recipe.id %}" class="text-decoration-none text-dark">
-                        <h6 class="card-title">{{ meal_plan_recipe.recipe.title }}</h6>
-                        <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
-                        <img class="card-img-top recipe-image" alt="{{ meal_plan_recipe.recipe.title }}" {% if meal_plan_recipe.recipe.url %} src="{{ meal_plan_recipe.recipe.url }}" {% else %} src="{{ meal_plan_recipe.recipe.image.url }}" {% endif %}>
-                        </div>
-                    </a>
-                    <!-- Drag handle -->
-                    <div class="card-handle">
-                    <span class="iconify drag-handle ic--outline-drag-indicator"></span>
-                    <span class="lock-handle circum--unlock"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {% endfor %}
-    </div>
+<!-- Pass the meal plan data to JavaScript -->
+<script>
+    const mealPlanData = {
+        meal_plan_recipes: [
+            {% for meal_plan_recipe in meal_plan.meal_plan_recipes.all %}
+                {
+                    id: {{ meal_plan_recipe.id }},
+                    position: {{ meal_plan_recipe.position }},
+                    recipe: {
+                        id: {{ meal_plan_recipe.recipe.id }},
+                        title: "{{ meal_plan_recipe.recipe.title|escapejs }}",
+                        imageUrl: "{% if meal_plan_recipe.recipe.url %}{{ meal_plan_recipe.recipe.url }}{% else %}{{ meal_plan_recipe.recipe.image.url }}{% endif %}",
+                    },
+                    is_blocked: {{ meal_plan_recipe.is_blocked|yesno:"true,false" }},
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+</script>
 
-    <div class="row">
-    {% for meal_plan_recipe in meal_plan.meal_plan_recipes.all %}
-    {% if not forloop.counter0|divisibleby:2 %}
-        <div class="col mb-4 card-wrap">
-            <div class="card h-100">
-                <div class="card-header text-center">
-                <h5>Dinner</h5>
-                </div>
-                <div class="card-body text-center" data-id="{{ forloop.counter0 }}">
-                    <a href="{% url 'recipes' id=meal_plan_recipe.recipe.id %}" class="text-decoration-none text-dark">
-                        <h6 class="card-title">{{ meal_plan_recipe.recipe.title }}</h6>
-                        <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
-                        <img class="card-img-top recipe-image" alt="{{ meal_plan_recipe.recipe.title }}" {% if meal_plan_recipe.recipe.url %} src="{{ meal_plan_recipe.recipe.url }}" {% else %} src="{{ meal_plan_recipe.recipe.image.url }}" {% endif %}>
-                        </div>
-                    </a>
-                    <!-- Drag Handle -->
-                    <div class="card-handle">
-                    <span class="iconify drag-handle ic--outline-drag-indicator" data-icon="ic:outline-drag-indicator"></span>
-                    <span class="lock-handle circum--unlock"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    {% endfor %}
-    </div>
-</div>
+<!-- Use JavaScript to sort the meal cards of the meal plan <div class="cards d-flex flex-wrap" id="card-sortable"></div>-->
+<div class="row" id="meal-plan-container"></div>
 
 {% if user.is_authenticated %}
     <form method="post" action="{% url 'save_mealplan' meal_plan.id %}">
@@ -84,14 +43,24 @@
 
 <div class="mt-4">
     <h2>Grocery List</h2>
-    <ul class="list-group">
-        {% for ingredient in grocery_list %}
-        <li class="list-group-item">
-            <input type="checkbox" class="mr-2"> {{ ingredient }}
-        </li>
-        {% endfor %}
-    </ul>
-    <button class="btn btn-primary mt-2" style="cursor: copy">Copy Grocery List</button>
+    <div class="grocery-grid">
+        <ul class="list-group" id="grocery-list">
+            {% for ingredient in grocery_list %}
+            <li class="list-group-item">
+                <input type="checkbox" class="mr-2">
+                {% if ingredient.unit == "by heart" %} <!-- neither quantity nor unit is displayed -->
+                {% else %}
+                <span id="ingredient-quantity" class="ingredient-quantity" data-original-quantity="{{ ingredient.quantity }}">{{ ingredient.quantity|floatformat:0 }}</span>
+                {{ ingredient.unit }} of
+                {% endif %}
+                {{ ingredient.name }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- Hidden div to store the plain-text grocery list -->
+    <div id="grocery-text" style="display: none;">{{ grocery_text }}</div>
+    <button class="btn btn-primary mt-2" id="copy-grocery-list">Copy Grocery List</button>
 </div>
 
 {% endblock %}

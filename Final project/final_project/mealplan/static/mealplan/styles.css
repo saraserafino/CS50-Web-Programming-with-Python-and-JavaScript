@@ -24,7 +24,7 @@
   width: 13rem; /* Adjust width as needed */
   margin: 0.5rem;
 }
-.card {
+.card-meal {
   height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--radius);
@@ -96,4 +96,17 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+}
+
+.grocery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+.grocery-grid .list-group {
+  display: contents; /* Remove the <ul> from the grid layout */
+}
+.grocery-grid .list-group-item {
+  break-inside: avoid; /* Prevent items from breaking across columns */
+  padding: 0.5rem;
 }
