@@ -1,6 +1,6 @@
 # Final project: recipe book & meal plan
 > [!NOTE]
-> Recipe book is finished, meal plan to do.
+> Recipe book is finished, meal plan is a work in progress.
 
 This web application is an online recipe book designed to help users discover, save, and manage recipes. Users can filter by recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
 For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility.
@@ -43,8 +43,6 @@ Although the design may seem similar to previous projects (e.g., search function
   - [Django](https://www.djangoproject.com/) (Python web framework)
   - [Django Admin](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/) for backend management
   - [SQLite](https://www.sqlite.org/index.html) (default Django database)
-- **Deployment**:
-  - (Add your deployment platform here, e.g., Heroku, AWS, or PythonAnywhere)
 
 ## Code organisation
 ### Models
@@ -70,12 +68,12 @@ The application includes the following models:
 - **`favourites`**: displays the user's saved recipes.
 - **`search`**: search for recipes where the query is contained in the title, procedure or ingredients.
 - **`add_recipe`** and **`edit_recipe`**: only the super user can add new recipes and edit them.
-- **`meal_plan`**: allows users to create and manage meal plans.
+- **`generate_mealplan`** and **`mealplan_result`**: allow users to create and modify meal plans.
 
 ### Static Files
-- **CSS**: custom styles for the application, including responsive design.
-- **JavaScript**: handles dynamic features like chosen plugin, infinite scroll, portion scaling, ingredient checklists, recipe editing, adding and removing an ingredient when creating a recipe.
-- **Images**: uploaded recipe images are stored in the `media` directory.
+- **CSS**: custom styles for the application, including responsive design, such as the "copied!" message when the grocery list is copied.
+- **JavaScript**: handles dynamic features like chosen plugin, infinite scroll, portion scaling, ingredient checklists, recipe editing, adding and removing an ingredient when creating a recipe. Particularly in the mealplan application, it shows and hides the ingredient selection field when generating a plan and, most importantly, it allows the user to modify a meal plan by dragging each meal and blocking it for future generation; it also allows the user to copy the grocery list.
+- **Images**: personally uploaded recipe images are stored in the `media` directory, while others are public urls.
 - 
 ## How to run
 ```bash
