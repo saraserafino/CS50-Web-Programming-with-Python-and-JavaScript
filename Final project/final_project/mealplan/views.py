@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import MealPlanForm
 from .models import MealPlan, MealPlanRecipe
-from recipebook.models import Recipe, Dish, Label, Ingredient
+from recipebook.models import User, Recipe, Dish, Label, Ingredient
 from collections import defaultdict
 import random
 
@@ -34,12 +34,11 @@ def generate_mealplan(request):
                 use_only_available = form.cleaned_data.get('use_only_available', False)
 
                 if available_ingredients:
+                    # Filter per recipes that use available ingredients
+                    recipes = Recipe.objects.filter(ingredient__in=available_ingredients).distinct()
                     if use_only_available:
-                        # Only include recipes that use the selected ingredients
-                        recipes = Recipe.objects.filter(ingredient__in=available_ingredients).distinct()
-                    else:
-                        # Include recipes that use the selected ingredients, but allow others ## fix this
-                        recipes = Recipe.objects.filter(ingredient__in=available_ingredients).distinct()
+                        # Exclude recipes that have ingredients NOT in the selected list
+                        recipes = recipes.exclude(ingredient__in=Ingredient.objects.exclude(id__in=available_ingredients)).distinct()
 
             # Apply label filter
             if label_ids:
@@ -160,3 +159,12 @@ def save_mealplan(request, meal_plan_id):
         messages.error(request, "You must be logged in to save this meal plan.")
 
     return redirect('mealplan_result', meal_plan_id=meal_plan.id)
+
+@login_required ## of course this is still to do
+def user_mealplan(request):
+    #meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
+    #user = get_object_or_404(User, username=username)
+    return render(request, 'mealplan/user_mealplan.html', {
+        #'username': user
+        #'meal_plan': meal_plan,
+    })

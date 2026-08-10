@@ -10,11 +10,19 @@ class MealPlanForm(forms.Form):
 
     generation_type = forms.ChoiceField(choices=GENERATION_CHOICES, widget=forms.RadioSelect)
 
+    # Preselect some ingredients by default
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        basic_ingredients = ["salt", "sugar", "garlic", "onion", "curry", "oil", "water", "cool water", "pasta", "flour", "rice", "basmati rice"]
+        # Get the IDs of such ingredients (assuming they exist in the database)
+        basic_ingredients = [Ingredient.objects.filter(ingredient_name__iexact=f'{i}').first() for i in basic_ingredients]
+        if basic_ingredients:
+            self.fields['available_ingredients'].initial = [i.id for i in basic_ingredients]
+
     # Use Chosen for typing ingredients to select
     available_ingredients = forms.ModelMultipleChoiceField(
         queryset=Ingredient.objects.all().order_by(Lower('ingredient_name')),
         widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
-        #widget=forms.CheckboxSelectMultiple,
         required=False,
     )
 
