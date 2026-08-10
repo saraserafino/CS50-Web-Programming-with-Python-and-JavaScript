@@ -102,7 +102,7 @@ def generate_mealplan(request):
     else:
         form = MealPlanForm()
 
-    return render(request, 'mealplan/home.html', {'form': form})
+    return render(request, 'mealplan/mealplan_generation.html', {'form': form})
 
 def mealplan_result(request, meal_plan_id):
     meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)

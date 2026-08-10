@@ -1,19 +1,26 @@
 from django.contrib import admin
 from django import forms
+from django.db.models.functions import Lower
 from .models import User, Dish, Label, Ingredient, Recipe, RecipeIngredient
 
 # Register your models here.
 admin.site.register(User)
 admin.site.register(Dish)
 admin.site.register(Label)
-admin.site.register(Ingredient)
 admin.site.register(RecipeIngredient)
+
+# Order ingredients by ingredient_name
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    ordering = [Lower('ingredient_name')]
+    search_fields = ('ingredient_name',)
 
 # Since ingredient is a many-to-many field with RecipeIngredient as intermediary model, TabularInline is used to create an inline class and associate it with the parent model
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1  # Number of empty forms to display for adding new ingredients
     fields = ('ingredient', 'quantity', 'unit')
+    search_fields = ('ingredient_name',)
 
 class RecipeForm(forms.ModelForm):
     class Meta:

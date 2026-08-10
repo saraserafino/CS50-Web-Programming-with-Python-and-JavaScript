@@ -1,5 +1,6 @@
 from django import forms
-from recipebook.models import Dish, Label, Ingredient
+from django.db.models.functions import Lower
+from recipebook.models import Label, Ingredient
 
 class MealPlanForm(forms.Form):
     GENERATION_CHOICES = [
@@ -11,7 +12,7 @@ class MealPlanForm(forms.Form):
 
     # Use Chosen for typing ingredients to select
     available_ingredients = forms.ModelMultipleChoiceField(
-        queryset=Ingredient.objects.all(),
+        queryset=Ingredient.objects.all().order_by(Lower('ingredient_name')),
         widget=forms.SelectMultiple(attrs={'class': 'chosen-select'}),
         #widget=forms.CheckboxSelectMultiple,
         required=False,
