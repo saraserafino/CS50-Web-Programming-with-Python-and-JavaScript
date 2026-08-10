@@ -140,20 +140,9 @@ def mealplan_result(request, meal_plan_id):
         for (name, unit), details in ingredient_dict.items()
     ]
 
-    # Generate the plain-text grocery list to later export it
-    grocery_text = []
-    for ingredient in grocery_list:
-        if ingredient["unit"] == "by heart":
-            grocery_text.append(ingredient["name"])
-        else:
-            quantity = int(ingredient["quantity"]) if ingredient["quantity"] % 1 == 0 else ingredient["quantity"]
-            grocery_text.append(f"{quantity} {ingredient["unit"]} of {ingredient["name"]}")
-    grocery_text_str = "\n".join(grocery_text)
-
     return render(request, 'mealplan/result.html', {
         'meal_plan': meal_plan,
-        'grocery_list': grocery_list,
-        'grocery_text': grocery_text_str
+        'grocery_list': grocery_list
     })
 
 @login_required

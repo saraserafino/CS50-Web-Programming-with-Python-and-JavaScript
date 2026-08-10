@@ -12,7 +12,6 @@
   --anim: cubic-bezier(0, 0, 0.25, 1);
 }
 
-/* Base styles for cards */
 .cards {
   display: flex;
   justify-content: center;
@@ -21,7 +20,7 @@
   width: 100vw;
 }
 .card-wrap {
-  width: 13rem; /* Adjust width as needed */
+  width: 13rem;
   margin: 0.5rem;
 }
 .card-meal {
@@ -57,7 +56,7 @@
   cursor: not-allowed !important;
 }
 
-/* Iconify designs from https://icon-sets.iconify.design */
+/* Iconify design from https://icon-sets.iconify.design */
 .ic--outline-drag-indicator {
   display: inline-block;
   width: 1em;
@@ -72,6 +71,7 @@
   mask-size: 100% 100%;
 }
 
+/* Lock/unlock handle on cards */
 .circum--lock {
   display: inline-block;
   width: 1em;
@@ -98,6 +98,53 @@
   cursor: pointer;
 }
 
+.grocery-header {
+  align-items: baseline;
+  display: inline-flex
+}
+
+/* Button for copying the grocery list */
+.copy-btn {
+  background: transparent;
+  color: rgb(255, 149, 0);
+  text-decoration: none;
+  border-style: none;
+  position: relative;
+  bottom: 10px
+}
+.mingcute--copy-fill {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ff9500' d='M19 2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zM8 15a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2zm1-9h6a2 2 0 0 1 2 2v8h2V4H9zm-1 5a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2z'/%3E%3C/svg%3E");
+}
+.mingcute--copy-fill:hover{
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23e18403' d='M19 2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2V4a2 2 0 0 1 2-2zM8 15a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2zm1-9h6a2 2 0 0 1 2 2v8h2V4H9zm-1 5a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2z'/%3E%3C/svg%3E");
+}
+/* "Copied!" message when grocery list is copied. Source https://stackoverflow.com/a/61092810 */
+.visuallyhidden{
+  position: absolute;
+  background: transparent;
+  clip:rect(1px,1px,1px,1px)
+}
+.button-tooltip-container {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  min-height: 30px;
+}
+#custom-tooltip {
+  display: none;
+  margin-left: 10px;
+  margin-bottom: 20px;
+  padding: 5px 10px;
+  background-color: rgb(255, 191, 0);
+  border-radius: 4px;
+}
+
+/* Grocery list in grid instead of only one column */
 .grocery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

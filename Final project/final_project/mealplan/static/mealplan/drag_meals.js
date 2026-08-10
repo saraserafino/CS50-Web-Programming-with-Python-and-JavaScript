@@ -160,14 +160,35 @@ document.addEventListener('DOMContentLoaded', function () {
 // User can export the grocery list
 document.addEventListener('DOMContentLoaded', function() {
     const copyButton = document.getElementById('copy-grocery-list');
-    const groceryText = document.getElementById('grocery-text').textContent;
+    const groceryList = document.getElementById('grocery-list');
 
     copyButton.addEventListener('click', function() {
+        const listItems = groceryList.querySelectorAll('.list-group-item');
+        // Build the list with check/uncheck symbols
+        const groceryText = Array.from(listItems).map(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            const isChecked = checkbox && checkbox.checked;
+            const checkSymbol = isChecked ? '[✓]' : '[ ]';
+            const text = item.textContent.trim().replace(/\s+/g, ' ');
+            return `${checkSymbol} ${text}`;
+        }).join('\n');
+        // Copy the list to the clipboard
         navigator.clipboard.writeText(groceryText)
-            .then(() => { alert('Grocery list copied to clipboard!'); })
             .catch(err => {
                 console.error('Failed to copy: ', err);
                 alert('Failed to copy grocery list. Please try again.');
             });
     });
 });
+// "Copied!" message when grocery list is copied. Source https://stackoverflow.com/a/61092810
+function copy(){
+    var message = document.getElementById("box");
+    message.value = window.location.href;
+    message.focus();
+    message.select();
+    document.getElementById("custom-tooltip").style.display = "inline";
+    document.execCommand("copy");
+    setTimeout( function() {
+        document.getElementById("custom-tooltip").style.display = "none";
+    }, 1000);
+};

@@ -7,6 +7,53 @@
 
 <div class="row text-center mb-3" id="days-header"></div>
 
+<!-- Use JavaScript to sort the meal cards of the meal plan -->
+<div class="row" id="meal-plan-container"></div>
+
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'save_mealplan' meal_plan.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success mt-3">Save Meal Plan</button>
+    </form>
+{% else %}
+    <div class="alert alert-info mt-3">
+        <strong>Note:</strong> <a href="{% url 'login' %}">Log in</a> to save this meal plan to your account.
+    </div>
+{% endif %}
+
+<div class="mt-4">
+    <div class="grocery-header">
+        <h2>Grocery List</h2>
+        <div class="button-tooltip-container">
+        <button class="copy-btn" id="copy-grocery-list" data-text="Copy ingredients" onclick="copy();">
+            <span class="mingcute--copy-fill"></span>
+        </button>
+        <span id="custom-tooltip">copied!</span>
+        <textarea class=visuallyhidden id="box"></textarea>
+        </div>
+    </div>
+    <div class="grocery-grid">
+        <ul class="list-group" id="grocery-list">
+            {% for ingredient in grocery_list %}
+            <li class="list-group-item">
+                <input type="checkbox" class="mr-2">
+                {% if ingredient.unit == "by heart" %} <!-- neither quantity nor unit is displayed -->
+                {% else %}
+                <span id="ingredient-quantity" class="ingredient-quantity" data-original-quantity="{{ ingredient.quantity }}">{{ ingredient.quantity|floatformat:0 }}</span>
+                {{ ingredient.unit }} of
+                {% endif %}
+                {{ ingredient.name }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<!-- Pass the CSRF token to JavaScript -->
+<script>const csrftoken = '{{ csrf_token }}';</script>
 <!-- Pass the meal plan data to JavaScript -->
 <script>
     const mealPlanData = {
@@ -26,48 +73,6 @@
         ]
     };
 </script>
-
-<!-- Use JavaScript to sort the meal cards of the meal plan <div class="cards d-flex flex-wrap" id="card-sortable"></div>-->
-<div class="row" id="meal-plan-container"></div>
-
-{% if user.is_authenticated %}
-    <form method="post" action="{% url 'save_mealplan' meal_plan.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success mt-3">Save Meal Plan</button>
-    </form>
-{% else %}
-    <div class="alert alert-info mt-3">
-        <strong>Note:</strong> <a href="{% url 'login' %}">Log in</a> to save this meal plan to your account.
-    </div>
-{% endif %}
-
-<div class="mt-4">
-    <h2>Grocery List</h2>
-    <div class="grocery-grid">
-        <ul class="list-group" id="grocery-list">
-            {% for ingredient in grocery_list %}
-            <li class="list-group-item">
-                <input type="checkbox" class="mr-2">
-                {% if ingredient.unit == "by heart" %} <!-- neither quantity nor unit is displayed -->
-                {% else %}
-                <span id="ingredient-quantity" class="ingredient-quantity" data-original-quantity="{{ ingredient.quantity }}">{{ ingredient.quantity|floatformat:0 }}</span>
-                {{ ingredient.unit }} of
-                {% endif %}
-                {{ ingredient.name }}
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <!-- Hidden div to store the plain-text grocery list -->
-    <div id="grocery-text" style="display: none;">{{ grocery_text }}</div>
-    <button class="btn btn-primary mt-2" id="copy-grocery-list">Copy Grocery List</button>
-</div>
-
-{% endblock %}
-
-{% block script %}
-<!-- Pass the CSRF token to JavaScript -->
-<script>const csrftoken = '{{ csrf_token }}';</script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script type="module">
 import { Sortable, Swap } from 'sortablejs/modular/sortable.core.esm';
