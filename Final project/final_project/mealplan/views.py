@@ -9,6 +9,43 @@ import random
 
 # Create your views here.
 
+# For a balanced meal plan
+REQUIRED_CATEGORIES = {'carbohydrate', 'protein', 'vegetables'}
+# Group recipes by their covered categories
+CATEGORY_GROUPS = {
+                'carbohydrate': [],
+                'protein': [],
+                'vegetables': [],
+                'carbohydrate+protein': [],
+                'carbohydrate+vegetables': [],
+                'protein+vegetables': [],
+                'carbohydrate+protein+vegetables': [],
+            }
+MEAL_DICT = {
+        'Monday': {'lunch': [], 'dinner': []},
+        'Tuesday': {'lunch': [], 'dinner': []},
+        'Wednesday': {'lunch': [], 'dinner': []},
+        'Thursday': {'lunch': [], 'dinner': []},
+        'Friday': {'lunch': [], 'dinner': []},
+        'Saturday': {'lunch': [], 'dinner': []},
+        'Sunday': {'lunch': [], 'dinner': []},
+    }
+
+# Helper functions for generate_mealplan
+def get_recipe_categories(recipe):
+    """Return the set of required categories (carbohydrate, protein, vegetables) for a recipe."""
+    return set(recipe.dish.values_list('dish_name', flat=True)) & REQUIRED_CATEGORIES
+
+def covers_categories(meal_ids):
+    """Check if a list of meal IDs covers all required categories."""
+    covered_categories = set()
+    for meal_id in meal_ids:
+        if meal_id is None:
+            continue
+        recipe = Recipe.objects.get(id=meal_id)
+        covered_categories.update(get_recipe_categories(recipe))
+    return covered_categories >= REQUIRED_CATEGORIES
+
 def generate_mealplan(request):
     if request.method == 'POST':
         form = MealPlanForm(request.POST)
@@ -19,10 +56,10 @@ def generate_mealplan(request):
                 session_key=request.session.session_key if not request.user.is_authenticated else None,
             )
             # Generate the meal plan based on user preferences
+            just_one_day = form.cleaned_data.get('just_one_day', False)
             generation_type = form.cleaned_data['generation_type']
             label_ids = form.cleaned_data.get('label', [])
             include_leftovers = form.cleaned_data.get('include_leftovers', False)
-            num_new_recipes = int(form.cleaned_data.get('num_new_recipes') or 0)
 
             # Base queryset for recipes
             recipes = Recipe.objects.all()
@@ -44,26 +81,14 @@ def generate_mealplan(request):
             if label_ids:
                 recipes = recipes.filter(label__in=label_ids).distinct()
 
-            # Split the queryset into existing and new recipes
-            existing_recipes = recipes.filter(is_new=False)
-            new_recipes = recipes.filter(is_new=True)
-            # Fetch their IDs
-            existing_ids = list(existing_recipes.values_list('id', flat=True))
-            new_ids = list(new_recipes.values_list('id', flat=True))
-            # Randomly select their IDs
-            ## Probably here you'll add something to balance a meal plan depending on dish filters
-            random.shuffle(existing_ids)
-            random.shuffle(new_ids)
+            # Fetch their IDs and shuffle them
+            meals_ids = list(recipes.values_list('id', flat=True))
+            random.shuffle(meals_ids)
 
-            # if include_leftovers, every dinner is also next day's lunch, except for weekend
-            num_meals_to_generate = 10 if include_leftovers else 14
-
-            # Select up to (num_meals_to_generate-num_new_recipes) from existing recipes
-            existing_ids = existing_ids[:num_meals_to_generate-num_new_recipes] if (num_meals_to_generate-num_new_recipes) > 0 else []
-            # Select up to num_new_recipes from new recipes
-            new_ids = new_ids[:num_new_recipes] if num_new_recipes > 0 else []
-            # Combine their IDs
-            meals_ids = existing_ids + new_ids # its length should be either 10 or 14
+            if just_one_day: # Just one lunch and dinner
+                num_meals_to_generate = 2
+            else: # if include_leftovers, every dinner is also next day's lunch, except for weekend
+                num_meals_to_generate = 10 if include_leftovers else 14
 
             # Fetch the selected recipes from the database
             recipes = Recipe.objects.filter(id__in=meals_ids)
@@ -75,18 +100,105 @@ def generate_mealplan(request):
             while len(meals_ids) < num_meals_to_generate:
                 meals_ids.extend(random.sample(meals_ids, min(num_meals_to_generate-len(meals_ids), len(meals_ids))))
 
-            # If include_leftovers, duplicate every dinner as the next day's lunch, except for weekend
-            if include_leftovers:
-                meals_leftovers = []
-                meals_leftovers.append(meals_ids[0]) # Monday lunch
-                for i in range(1, 5):
-                    meals_leftovers.append(meals_ids[i]) # dinner
-                    meals_leftovers.append(meals_ids[i]) # next day's lunch
-                for i in range(5, num_meals_to_generate): # weekends
-                    meals_leftovers.append(meals_ids[i])
-                # Fetch the selected recipes from the database
-                recipes = Recipe.objects.filter(id__in=meals_leftovers)
-                meals_ids = meals_leftovers
+            # Sort every filtered recipe per categories
+            category_groups = CATEGORY_GROUPS.copy()
+            for recipe in recipes:
+                categories = get_recipe_categories(recipe)
+                if not categories:
+                    continue  # Skip recipes that don't cover any required category
+
+                category_key = '+'.join(sorted(categories))
+                if category_key in category_groups:
+                    category_groups[category_key].append(recipe.id)
+
+            if just_one_day:
+                lunch, dinner = [], []##  either a 'carbohydrate+vegetables' or two meals given by 'carbohydrate' and 'vegetables
+                ## dinner is either a 'protein+vegetables' or two meals given by 'protein' and 'vegetables
+                ## Here I could have a dictionary meal_dict with lunches and dinners as first element,
+                ## Then in the case of just_one_day I will have meal_dict['lunches']=lunch and meal_dict['dinners']=dinner
+                ## Technically for the weekly meal plan I will have meal_dict['lunches']=[lunch[0],lunch[1],...]
+                ##where both lunch of just_one_day and lunch[0],lunch[1] can have more than one meal_id, since they can have,
+                ## for example, a carbohydrate and a vegetable
+
+                # Try to find a single recipe for lunch that covers carbohydrate+vegetables
+                if category_groups['carbohydrate+vegetables']:
+                    lunch.append(category_groups['carbohydrate+vegetables'].pop())
+                else: # Otherwise, pick separate carbohydrate and vegetables recipes
+                    if category_groups['carbohydrate']:
+                        lunch.append(category_groups['carbohydrate'].pop())
+                    if category_groups['vegetables']:
+                        lunch.append(category_groups['vegetables'].pop())
+                # Try to find a single recipe for dinner that covers protein+vegetables
+                if category_groups['protein+vegetables']:
+                    dinner.append(category_groups['protein+vegetables'].pop())
+                else: # Otherwise, pick separate protein and vegetables recipes
+                    if category_groups['protein']:
+                        dinner.append(category_groups['protein'].pop())
+                    if category_groups['vegetables']:
+                        dinner.append(category_groups['vegetables'].pop())
+
+                # Flatten lunch and dinner into meals_ids
+                meals_ids = lunch + dinner
+
+            # Weekly meal plan
+            else:
+                meal_dict = MEAL_DICT.copy()
+                # Generate meals for each day
+                for day_index, day_name in enumerate(meal_dict.keys()):
+                    # if include_leftovers and it's not Monday or weekend, lunch is the previous day's dinner
+                    if include_leftovers and day_index > 0 and day_index < 5:
+                        prev_day = list(meal_dict.keys())[day_index - 1]
+                        meal_dict[day_name]['lunch'] = meal_dict[prev_day]['dinner'].copy()
+
+                    # If lunch is already set (because include_leftovers), balance dinner accordingly
+                    if meal_dict[day_name]['lunch']:
+                        lunch_categories = set()
+                        for meal_id in meal_dict[day_name]['lunch']:
+                            lunch_categories.update(get_recipe_categories(Recipe.objects.get(id=meal_id)))
+
+                        remaining_categories = REQUIRED_CATEGORIES - lunch_categories
+                        for category_key in sorted(category_groups.keys(), key=lambda x: -len(x.split('+'))):
+                            if not category_groups[category_key]:
+                                continue # Skip recipes that don't cover any required category
+                            recipe_categories = set(category_key.split('+'))
+                            if recipe_categories & remaining_categories:
+                                recipe_id = category_groups[category_key].pop()
+                                meal_dict[day_name]['dinner'].append(recipe_id)
+                                remaining_categories -= recipe_categories
+                                if not remaining_categories:
+                                    break
+                    else: # Generate both lunch (carbohydrate + vegetables) and dinner (protein + vegetables)
+                        if category_groups['carbohydrate+vegetables']:
+                            meal_dict[day_name]['lunch'].append(category_groups['carbohydrate+vegetables'].pop())
+                        else:
+                            if category_groups['carbohydrate']:
+                                meal_dict[day_name]['lunch'].append(category_groups['carbohydrate'].pop())
+                            if category_groups['vegetables']:
+                                meal_dict[day_name]['lunch'].append(category_groups['vegetables'].pop())
+
+                        if category_groups['protein+vegetables']:
+                            meal_dict[day_name]['dinner'].append(category_groups['protein+vegetables'].pop())
+                        else:
+                            if category_groups['protein']:
+                                meal_dict[day_name]['dinner'].append(category_groups['protein'].pop())
+                            if category_groups['vegetables']:
+                                meal_dict[day_name]['dinner'].append(category_groups['vegetables'].pop())
+
+                    # If the day's meals don't cover all categories, add a vegetable recipe
+                    day_meals = meal_dict[day_name]['lunch'] + meal_dict[day_name]['dinner']
+                    if not covers_categories(day_meals):
+                        if category_groups['vegetables']:
+                            meal_dict[day_name]['dinner'].append(category_groups['vegetables'].pop())
+
+                # Flatten meal_dict into meals_ids
+                meals_ids = []
+                for day_name in meal_dict.keys():
+                    meals_ids.extend(meal_dict[day_name]['lunch'])
+                    meals_ids.extend(meal_dict[day_name]['dinner'])
+
+            # If there are not enough recipes, repeat some to fill the meals
+            while len(meals_ids) < num_meals_to_generate:
+                meals_ids.extend(random.sample(meals_ids, min(num_meals_to_generate-len(meals_ids), len(meals_ids))))
 
             # Add recipes to the meal plan
             for position, recipe_id in enumerate(meals_ids, start=1):

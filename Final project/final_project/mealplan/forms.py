@@ -3,6 +3,8 @@ from django.db.models.functions import Lower
 from recipebook.models import Label, Ingredient
 
 class MealPlanForm(forms.Form):
+    just_one_day = forms.BooleanField(required=False, label="Generate the meal plan for just one day.")
+
     GENERATION_CHOICES = [
         ('random', 'Random Generation'),
         ('ingredients', 'Select Ingredients'),
@@ -35,6 +37,5 @@ class MealPlanForm(forms.Form):
         required=False,
     )
 
-    # Fields for meal plan preferences
+    # Include leftovers i.e. dinner is the next day's lunch
     include_leftovers = forms.BooleanField(required=False, label="Include leftovers for lunch the next day")
-    num_new_recipes = forms.IntegerField(min_value=0, max_value=10, required=False, label="Number of new recipes to include")

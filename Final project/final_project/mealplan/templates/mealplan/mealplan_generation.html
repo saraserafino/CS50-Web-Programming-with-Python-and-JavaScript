@@ -9,6 +9,12 @@
 
 <form method="post">
     {% csrf_token %}
+
+    <div class="form-group form-check">
+        {{ form.just_one_day }}
+        <label class="form-check-label" for="{{ form.just_one_day.id_for_label }}">Generate for just one day.</label>
+    </div>
+
     <div class="form-group">
         <label>Generation Type:</label>
         <div class="form-check">
@@ -40,14 +46,9 @@
         {{ form.label }}
     </div>
 
-    <!-- Meal plan preferences -->
-    <div class="form-group">
+    <div class="form-group form-check">
         {{ form.include_leftovers }}
-        <label for="{{ form.include_leftovers.id_for_label }}">Include leftovers for lunch the next day</label>
-    </div>
-    <div class="form-group">
-        <label>How many new recipes do you want ot try?</label>
-        {{ form.num_new_recipes }}
+        <label class="form-check-label" for="{{ form.include_leftovers.id_for_label }}">Include leftovers for lunch the next day (only for weekly plans)</label>
     </div>
 
     <button type="submit" class="btn btn-warning">Generate Meal Plan</button>

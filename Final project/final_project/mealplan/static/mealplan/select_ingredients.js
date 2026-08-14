@@ -33,3 +33,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Call the function once to set the initial state
     toggleIngredientSelection();
 });
+
+// Disable include_leftovers if just_one_day is checked////NON FUNZIONA
+document.addEventListener('DOMContentLoaded', function() {
+    const justOneDayCheckbox = document.getElementById('{{ form.just_one_day.id_for_label }}');
+    const includeLeftoversCheckbox = document.getElementById('{{ form.include_leftovers.id_for_label }}');
+
+    // Disable include_leftovers if just_one_day is checked
+    function toggleIncludeLeftovers() {
+        includeLeftoversCheckbox.disabled = justOneDayCheckbox.checked;
+        if (justOneDayCheckbox.checked) {
+            includeLeftoversCheckbox.checked = false;
+        }
+    }
+    justOneDayCheckbox.addEventListener('change', toggleIncludeLeftovers);
+    toggleIncludeLeftovers();
+});
