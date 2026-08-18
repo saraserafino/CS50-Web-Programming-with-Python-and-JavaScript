@@ -10,7 +10,6 @@ $(document).ready(function() {
 document.addEventListener('DOMContentLoaded', function() {
     const generationTypeRadios = document.querySelectorAll('input[name="generation_type"]');
     const ingredientSelectionDiv = document.getElementById('ingredient-selection');
-
     // Function to toggle ingredient selection fields
     function toggleIngredientSelection() {
         const selectedValue = document.querySelector('input[name="generation_type"]:checked').value;
@@ -24,28 +23,31 @@ document.addEventListener('DOMContentLoaded', function() {
             ingredientSelectionDiv.style.display = 'none';
         }
     }
-
     // Add event listeners to radio buttons
     generationTypeRadios.forEach(radio => {
         radio.addEventListener('change', toggleIngredientSelection);
     });
-
     // Call the function once to set the initial state
     toggleIngredientSelection();
 });
 
-// Disable include_leftovers if just_one_day is checked////NON FUNZIONA
+// Disable include_leftovers if just_one_day is checked
 document.addEventListener('DOMContentLoaded', function() {
-    const justOneDayCheckbox = document.getElementById('{{ form.just_one_day.id_for_label }}');
-    const includeLeftoversCheckbox = document.getElementById('{{ form.include_leftovers.id_for_label }}');
-
+    const justOneDayCheckbox = document.querySelector('input[name="just_one_day"]');
+    const includeLeftoversCheckbox = document.querySelector('input[name="include_leftovers"]');
     // Disable include_leftovers if just_one_day is checked
     function toggleIncludeLeftovers() {
-        includeLeftoversCheckbox.disabled = justOneDayCheckbox.checked;
-        if (justOneDayCheckbox.checked) {
-            includeLeftoversCheckbox.checked = false;
+        if (justOneDayCheckbox && includeLeftoversCheckbox) {
+            includeLeftoversCheckbox.disabled = justOneDayCheckbox.checked;
+            if (justOneDayCheckbox.checked) {
+                includeLeftoversCheckbox.checked = false;
+            }
         }
     }
-    justOneDayCheckbox.addEventListener('change', toggleIncludeLeftovers);
+    // Add event listener if the checkbox exists
+    if (justOneDayCheckbox) {
+        justOneDayCheckbox.addEventListener('change', toggleIncludeLeftovers);
+    }
+
     toggleIncludeLeftovers();
 });

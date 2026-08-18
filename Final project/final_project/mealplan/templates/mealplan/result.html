@@ -1,14 +1,136 @@
 {% extends "recipebook/layout.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block body %}
 
-<h1>Your weekly meal plan</h1><br>
+<h1>{% if just_one_day %}Your daily meal plan
+    {% else %}Your weekly meal plan
+    {% endif %}</h1><br>
 
-<div class="row text-center mb-3" id="days-header"></div>
+<!-- Days header only for weekly plan -->
+{% if not just_one_day %}
+<div class="row text-center mb-3" id="days-header">
+    {% for day in meal_dict.keys %}
+    <div class="col">
+        <h4>{{ day }}</h4>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-<!-- Use JavaScript to sort the meal cards of the meal plan -->
-<div class="row" id="meal-plan-container"></div>
+<div class="row" id="meal-plan-container">
+    <!-- Single-day layout -->
+    {% if just_one_day %}
+    <div class="col-md-5 mb-4">
+        <div class="card-header text-center">
+            <h5>Lunch</h5>
+        </div>
+        {% for lunchRecipe in meal_dict.Today.lunch %}
+        <div class="mb-2 card-wrap">
+            <div class="sortable-card card-meal h-100">
+                <div class="card-body text-center" data-id="{{ lunchRecipe.id }}">
+                    <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
+                        <h6 class="card-title">{{ lunchRecipe.title }}</h6>
+                        <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                        <img class="card-img-top recipe-image" alt="{{ lunchRecipe.title }}" {% if lunchRecipe.url %} src="{{ lunchRecipe.url }}" {% else %} src="{{ lunchRecipe.image.url }}" {% endif %}>
+                        </div>
+                    </a>
+                    <!-- Drag handle -->
+                    <div class="card-handle">
+                        <span class="iconify drag-handle ic--outline-drag-indicator"></span>
+                        <span class="lock-handle circum--unlock"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="col-md-5 mb-4">
+        <div class="card-header text-center">
+            <h5>Dinner</h5>
+        </div>
+        {% for dinnerRecipe in meal_dict.Today.dinner %}
+        <div class="mb-2 card-wrap">
+            <div class="sortable-card card-meal h-100">
+                <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}">
+                    <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
+                        <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
+                        <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                        <img class="card-img-top recipe-image" alt="{{ dinnerRecipe.title }}" {% if dinnerRecipe.url %} src="{{ dinnerRecipe.url }}" {% else %} src="{{ dinnerRecipe.image.url }}" {% endif %}>
+                        </div>
+                    </a>
+                    <!-- Drag handle -->
+                    <div class="card-handle">
+                        <span class="iconify drag-handle ic--outline-drag-indicator"></span>
+                        <span class="lock-handle circum--unlock"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Weekly layout -->
+    {% else %}
+    {% for day in meal_dict.keys %}
+    <div class="col">
+        <div class="d-flex flex-column">
+            <div class="mb-2 card-wrap">
+                <div class="card-header text-center">
+                    <h5>{{ day }} Lunch</h5>
+                </div>
+            {% with day_meals=meal_dict|get_item:day %}
+            {% for lunchRecipe in day_meals.lunch %}
+                <div class="sortable-card card-meal h-100">
+                    <div class="card-body text-center" data-id="{{ lunchRecipe.id }}">
+                        <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
+                            <h6 class="card-title">{{ lunchRecipe.title }}</h6>
+                            <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                            <img class="card-img-top recipe-image" alt="{{ lunchRecipe.title }}" {% if lunchRecipe.url %} src="{{ lunchRecipe.url }}" {% else %} src="{{ lunchRecipe.image.url }}" {% endif %}>
+                            </div>
+                        </a>
+                        <!-- Drag handle -->
+                        <div class="card-handle">
+                            <span class="iconify drag-handle ic--outline-drag-indicator"></span>
+                            <span class="lock-handle circum--unlock"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endwith %}
+
+
+            <div class="mb-2 card-wrap">
+                <div class="card-header text-center">
+                    <h5>{{ day }} Dinner</h5>
+                </div>
+            {% with day_meals=meal_dict|get_item:day %}
+            {% for dinnerRecipe in day_meals.dinner %}
+                <div class="sortable-card card-meal h-100">
+                    <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}">
+                        <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
+                            <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
+                            <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                            <img class="card-img-top recipe-image" alt="{{ dinnerRecipe.title }}" {% if dinnerRecipe.url %} src="{{ dinnerRecipe.url }}" {% else %} src="{{ dinnerRecipe.image.url }}" {% endif %}>
+                            </div>
+                        </a>
+                        <!-- Drag handle -->
+                        <div class="card-handle">
+                            <span class="iconify drag-handle ic--outline-drag-indicator"></span>
+                            <span class="lock-handle circum--unlock"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endwith %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
 
 {% if user.is_authenticated %}
     <form method="post" action="{% url 'save_mealplan' meal_plan.id %}">
@@ -54,25 +176,6 @@
 {% block script %}
 <!-- Pass the CSRF token to JavaScript -->
 <script>const csrftoken = '{{ csrf_token }}';</script>
-<!-- Pass the meal plan data to JavaScript -->
-<script>
-    const mealPlanData = {
-        meal_plan_recipes: [
-            {% for meal_plan_recipe in meal_plan.meal_plan_recipes.all %}
-                {
-                    id: {{ meal_plan_recipe.id }},
-                    position: {{ meal_plan_recipe.position }},
-                    recipe: {
-                        id: {{ meal_plan_recipe.recipe.id }},
-                        title: "{{ meal_plan_recipe.recipe.title|escapejs }}",
-                        imageUrl: "{% if meal_plan_recipe.recipe.url %}{{ meal_plan_recipe.recipe.url }}{% else %}{{ meal_plan_recipe.recipe.image.url }}{% endif %}",
-                    },
-                    is_blocked: {{ meal_plan_recipe.is_blocked|yesno:"true,false" }},
-                }{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ]
-    };
-</script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script type="module">
 import { Sortable, Swap } from 'sortablejs/modular/sortable.core.esm';

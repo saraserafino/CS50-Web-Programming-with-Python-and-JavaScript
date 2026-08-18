@@ -26,6 +26,17 @@ class MealPlanRecipe(models.Model):
     is_blocked = models.BooleanField(default=False)
     # Specify the position of the meal
     position = models.PositiveIntegerField()
+    meal_type = models.CharField(max_length=10, choices=[('lunch', 'Lunch'), ('dinner', 'Dinner')], default='lunch')
+    day = models.CharField(max_length=10, choices=[
+        ('Monday', 'monday'),
+        ('Tuesday', 'tuesday'),
+        ('Wednesday', '2ednesday'),
+        ('Thursday', 'thursday'),
+        ('Friday', 'friday'),
+        ('Saturday', 'saturday'),
+        ('Sunday', 'sunday'),
+        ('Today', 'today'),
+    ], default='Monday')
 
     class Meta:
         ordering = ['position']
