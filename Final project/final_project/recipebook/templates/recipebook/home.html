@@ -3,16 +3,156 @@
 
 {% block body %}
 
-This is the home where I will explain how it functions.
+<div class="home-container">
+    <h1>Welcome to "Le prelibatezze della prociona"</h1>
 
-<!-- Link to the meal plan app -->
-<div class="container my-4">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Create a Meal Plan</h5>
-            <p class="card-text">Generate a balanced meal plan for a day or a week based on your preferences.</p>
-            <a href="{% url 'generate_mealplan' %}" class="btn btn-warning">Go to Meal Plan</a>
+    <p>
+        "The Delicacies of the Raccoon" is my personal collection of recipes and meal planning tools.<br>
+        As a self-proclaimed raccoon, I'm a true glutton at heart, especially when it comes to desserts and chocolate.
+        But food isn't just about indulgence: it's also about nourishing our bodies and minds.
+    </p>
+
+    <div class="section">
+        <p>
+            That is why this website isn't just a collection of my personal recipes; it's also a tool to help you create
+            <span class="highlight">balanced meal plans</span> tailored to your needs.
+        </p>
+
+        <p>
+            Here, you'll find a <span class="highlight">plant-based focus</span>: a choice driven by compassion for animals,
+            a commitment to personal health, and a responsibility toward our planet. For more on the benefits of plant-based diets,
+            check out the
+            <a href="https://higherlogicdownload.s3.amazonaws.com/THEACADEMY/859dd171-3982-43db-8535-56c4fdc42b51/UploadedImages/VN/Documents/Position-of-the-Academy-of-Nutrition-and-Dietetics-Vegetarian-Diets.pdf" class="link-style">
+                position of the Academy of Nutrition and Dietetics on vegan and vegetarian diets</a>.
+        </p>
+
+        <p>
+            I always use alternatives like plant-based milk and butter or nutritional yeast instead of cheese like Parmigiano Reggiano.
+            If you eat meat, you won't find it here — but that doesn't mean you can't enjoy the meal plans or adapt them to your preferences.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-flex-start">
+        <img src="media/images/recipebook.png" width="10%" height="10%" alt="recipe book" class="align-items-center">
+        <h2>Recipe Book</h2>
+    </div>
+
+    <div class="section">
+        <p>
+            Cooking is my passion — perhaps because it leads to eating, but let's not judge a raccoon!
+            Over the years, I have gathered recipes from countless sources, and now it's time to bring them all together in one place.
+        </p>
+
+        <h4>How It Works</h4>
+        <ul>
+            <li>
+                <span class="highlight">Categorization:</span> Recipes are organized by <span class="highlight">dish type</span>
+                (protein, carbohydrate, vegetables, dessert, sauce) and <span class="highlight">dietary labels</span>
+                (vegan, vegetarian, gluten-free).
+            </li>
+            <li>
+                <span class="highlight">Filtering:</span> Click on a label to see all recipes that match, or combine multiple labels to refine your search.
+            </li>
+            <li>
+                <span class="highlight">Approval Status:</span> Some recipes are still untested — you'll find a label indicating their status.
+            </li>
+            <li>
+                <span class="highlight">Search:</span> Use the search bar to find recipes by title, ingredients, or instructions.
+            </li>
+            <li>
+                <span class="highlight">Portion Adjustments:</span> Each recipe includes ingredient quantities for a standard portion.
+                Adjust the portion size, and the ingredient amounts will update automatically.
+            </li>
+        </ul>
+
+        <p class="note">
+            <strong>Note on Gluten-Free Recipes:</strong> Many recipes are labeled as gluten-free, even if they contain flour.
+            If you're celiac or gluten-intolerant, you likely already know how to substitute regular flour with gluten-free alternatives
+            (e.g., rice, chickpea, almond, or nut flour) or find gluten-free versions of bread, pasta, piadina or pizza.
+        </p>
+    </div>
+
+    <div class="d-flex justify-content-flex-start">
+        <img src="media/images/mealplanner.png" width="10%" height="10%" alt="planner" class="align-items-center">
+        <h2>Meal Planner</h2>
+    </div>
+
+    <div class="section">
+        <p>
+            Planning meals can be a challenge, especially when balancing work, family, and personal time.
+            That's where the <span class="highlight">meal planner</span> comes in, generating a
+            <span class="highlight">balanced meal plan</span> for a single day or an entire week, based on your preferences.
+        </p>
+
+        <h4>How It Works</h4>
+        <ul>
+            <li>
+                <span class="highlight">Flexibility:</span> Choose between generating a plan for
+                <span class="italic-text">just one day</span> or the <span class="italic-text">entire week</span>.
+            </li>
+            <li>
+                <span class="highlight">Dietary Preferences:</span> Filter recipes by dietary labels to match your needs.
+            </li>
+            <li>
+                <span class="highlight">Ingredient Selection:</span> Randomly generate a plan or select ingredients you already have.
+                You can also choose whether to use only those ingredients or allow for additional grocery shopping.
+            </li>
+            <li>
+                <span class="highlight">Pre-Selected Staples:</span> Basic ingredients like salt, spices, and flour are pre-selected for convenience,
+                but you can remove them if you don't have them on hand.
+            </li>
+        </ul>
+
+        <h4>Leftovers Option</h4>
+        <p>
+            Enable the <span class="highlight">include leftovers</span> feature to use dinner as the next day's lunch — perfect for meal prepping
+            or reducing cooking time. Keep in mind that recipes have fixed portions, so the grocery list will reflect those amounts.
+            (Future updates may include portion adjustments based on the number of people.)
+        </p>
+
+        <h4>Balanced Nutrition</h4>
+        <p>
+            The meal planner ensures <span class="highlight">nutritional balance</span>:
+        </p>
+        <ul>
+            <li>Each day includes at least <span class="highlight">two vegetable dishes</span>, <span class="highlight">one carbohydrate</span>, and <span class="highlight">one protein source</span>.</li>
+            <li>Some recipes are <span class="highlight">complete meals</span>, fulfilling all nutritional needs on their own.</li>
+        </ul>
+
+        <p class="note">
+            <strong>Notes on Breakfast and Fruit:</strong>
+            <span class="italic-text">Fruit</span> isn't included in the meal plans (except in some desserts).
+            After all, picking a fruit is simple enough!
+            <span class="italic-text">Breakfast</span> isn't part of the generated plans, but many desserts can double as breakfast options.
+            Pair them with fruit, yogurt, milk, or tea for a balanced start to your day.
+        </p>
+
+        <h4>My Smoothie Tip</h4>
+        <p>
+            Lately, I've been starting my day with a <span class="highlight">nutrient-packed smoothie</span>:
+        </p>
+        <div class="d-flex justify-content-between">
+            <ul>
+                <li><span class="highlight">Base:</span> Soy milk with chia seeds and cocoa (or vegan chocolate protein powder) for fibres. In particular, chia seeds bring omega-3 and a lot of vitamines.</li>
+                <li><span class="highlight">Add-ins:</span> Berries (always in my freezer) or banana, spinach (trust me, you won't taste it unless you overdo it) and date syrup for vitamins and fibres.</li>
+                <li><span class="highlight">Healthy Fats:</span> Nuts like almonds or walnuts, and occasionally a spoonful of peanut butter.</li>
+            </ul>
+            <img src="media/images/smoothies.png" width="22%" height="22%" alt="smoothies">
         </div>
+    </div>
+
+    <p>
+        Enough talking — it's time to <span class="highlight">generate your meal plan</span>!
+        And if you register, you can save your favorite recipes and meal plans for easy access later.
+    </p>
+</div>
+
+<!-- Meal Plan Card -->
+<div class="meal-plan-card">
+    <div class="card-body">
+        <h5 class="card-title">Create Your Meal Plan</h5>
+        <p class="card-text">Generate a balanced meal plan for a day or a week based on your preferences.</p>
+        <a href="{% url 'generate_mealplan' %}" class="btn btn-warning">Go to Meal Plan</a>
     </div>
 </div>
 {% endblock %}
