@@ -6,6 +6,7 @@ from .models import MealPlan, MealPlanRecipe
 from recipebook.models import User, Recipe, Dish, Label, Ingredient
 from collections import defaultdict
 import random
+from django.db.models import Q
 
 # Create your views here.
 
@@ -21,7 +22,7 @@ CATEGORY_GROUPS = {
                 'protein+vegetables': [],
                 'carbohydrate+protein+vegetables': [],
             }
-MEAL_DICT = {
+MEAL_DICTIONARY = {
         'Monday': {'lunch': [], 'dinner': []},
         'Tuesday': {'lunch': [], 'dinner': []},
         'Wednesday': {'lunch': [], 'dinner': []},
@@ -52,7 +53,7 @@ def generate_mealplan(request):
         if form.is_valid():
             # Generate the meal plan based on user preferences
             generation_type = form.cleaned_data['generation_type']
-            label_ids = form.cleaned_data.get('label', [])
+            labels = form.cleaned_data.get('label', [])
             include_leftovers = form.cleaned_data.get('include_leftovers', False)
             just_one_day = form.cleaned_data.get('just_one_day', False)
 
@@ -78,9 +79,14 @@ def generate_mealplan(request):
                         # Exclude recipes that have ingredients NOT in the selected list
                         recipes = recipes.exclude(ingredient__in=Ingredient.objects.exclude(id__in=available_ingredients)).distinct()
 
-            # Apply label filter
-            if label_ids:
-                recipes = recipes.filter(label__in=label_ids).distinct()
+            # Apply label filter with AND logic (with "if labels" it would have been OR logic)
+            label_ids = [label.id for label in labels] # labels = [<Label: vegan>, <Label: vegetarian>, <Label: gluten-free>]
+            for label_id in label_ids:
+                if label_id == 2: # if vegetarian (label=2), include also vegan (label=1) -> OR logic
+                    recipes = recipes.filter(Q(label__id=1) | Q(label__id=2))
+                else:
+                    recipes = recipes.filter(label__id=label_id)
+            recipes = recipes.distinct()
 
             # Fetch their IDs and shuffle them
             meals_ids = list(recipes.values_list('id', flat=True))
@@ -96,7 +102,7 @@ def generate_mealplan(request):
             # Check if recipes is empty
             if not recipes.exists():
                 messages.error(request, "No recipes match your criteria. Please try different filters.")
-                return redirect('mealplan_home')
+                return render(request, 'mealplan/mealplan_generation.html', {'form': form})
             # If there are not enough recipes, repeat some to fill the meals
             while len(meals_ids) < num_meals_to_generate:
                 meals_ids.extend(random.sample(meals_ids, min(num_meals_to_generate-len(meals_ids), len(meals_ids))))
@@ -112,7 +118,7 @@ def generate_mealplan(request):
                 if category_key in category_groups:
                     category_groups[category_key].append(recipe.id)
 
-            meal_dict = MEAL_DICT.copy() if not just_one_day else {'Today': {'lunch': [], 'dinner': []}}
+            meal_dict = MEAL_DICTIONARY.copy() if not just_one_day else {'Today': {'lunch': [], 'dinner': []}}
             if just_one_day:
                 # Randomly decide whether to use a single but complete recipe or separate recipes for a meal
                 # Lunch
@@ -145,7 +151,7 @@ def generate_mealplan(request):
                     if meal_dict[day_name]['lunch']:
                         lunch_categories = set()
                         for meal_id in meal_dict[day_name]['lunch']:
-                            lunch_categories.update(get_recipe_categories(Recipe.objects.get(id=meal_id)))
+                            lunch_categories.update(get_recipe_categories(Recipe.objects.get(id=meal_id.id)))
 
                         remaining_categories = REQUIRED_CATEGORIES - lunch_categories
                         for category_key in sorted(category_groups.keys(), key=lambda x: -len(x.split('+'))):
@@ -208,8 +214,8 @@ def mealplan_result(request, meal_plan_id):
     meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
     # Determine if it is a single-day or weekly
     just_one_day = meal_plan.meal_plan_recipes.count() == 2
-    # Reconstruct meal_dict ## poi controlla se non ti stampa meal_dict più volte perché ora quando refresho duplica la lista
-    meal_dict = MEAL_DICT.copy() if not just_one_day else {'Today': {'lunch': [], 'dinner': []}}
+    # Reconstruct meal_dict ## poi controlla se non ti stampa meal_dict più volte perché ora quando refresho duplica la lista. però effettivamente perché dovrei refreshare la stessa pagina
+    meal_dict = MEAL_DICTIONARY.copy() if not just_one_day else {'Today': {'lunch': [], 'dinner': []}}
     for meal_plan_recipe in meal_plan.meal_plan_recipes.all().order_by('position'):
         meal_type = meal_plan_recipe.meal_type
         meal_dict[meal_plan_recipe.day][meal_type].append(meal_plan_recipe.recipe) if not just_one_day else meal_dict['Today'][meal_type].append(meal_plan_recipe.recipe)

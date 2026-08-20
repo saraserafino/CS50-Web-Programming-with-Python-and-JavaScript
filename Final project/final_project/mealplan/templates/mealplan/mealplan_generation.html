@@ -32,12 +32,12 @@
     <!-- Ingredient selection fields (hidden by default) -->
     <div id="ingredient-selection" style="display: none;">
         <div class="form-group">
-            <label>What ingredients would you like to use? Notice how some basic ingredients are preselected to ease the process.</label>
+            <label>What ingredients would you like to use? Basic ingredients are preselected to ease the process.</label>
             {{ form.available_ingredients }}
         </div>
         <div class="form-group">
             {{ form.use_only_available }}
-            <label for="{{ form.use_only_available.id_for_label }}">Use only available ingredients</label>
+            <label for="{{ form.use_only_available.id_for_label }}">Use only available ingredients.</label>
         </div>
     </div>
 
@@ -48,7 +48,7 @@
 
     <div class="form-group form-check">
         {{ form.include_leftovers }}
-        <label class="form-check-label" for="{{ form.include_leftovers.id_for_label }}">Include leftovers for lunch the next day (only for weekly plans)</label>
+        <label class="form-check-label" for="{{ form.include_leftovers.id_for_label }}">Include leftovers for lunch the next day (only for weekly plans).</label>
     </div>
 
     <button type="submit" class="btn btn-warning">Generate Meal Plan</button>

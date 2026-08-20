@@ -217,11 +217,14 @@ def display_filters(request):
     dish_ids = request.POST.getlist("dish") if request.method == "POST" else request.GET.getlist("dish")
     label_ids = request.POST.getlist("label") if request.method == "POST" else request.GET.getlist("label")
 
-    # Filter applying an AND logic (with "if dish_ids" it would have been an OR logic)
+    # Filter applying AND logic (with "if dish_ids" it would have been OR logic)
     for dish_id in dish_ids:
         recipes = recipes.filter(dish__id__in=dish_id)
     for label_id in label_ids:
-        recipes = recipes.filter(label__id__in=label_id)
+        if '2' in label_ids: # if vegetarian (label=2), include also vegan (label=1) -> OR logic
+            recipes = recipes.filter(Q(label__id__in='1') | Q(label__id__in='2'))
+        else:
+            recipes = recipes.filter(label__id__in=label_id)
 
     # Filter recipes by new or approved
     recipe_status = request.POST.get("recipe_status") if request.method == "POST" else request.GET.get("recipe_status")

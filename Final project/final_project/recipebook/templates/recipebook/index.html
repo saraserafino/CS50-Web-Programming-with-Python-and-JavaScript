@@ -51,11 +51,11 @@
 
         <div class="mb-2">
             {% for dish in recipe.dish.all %}
-            <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
+                <a href="{% url 'display_filters' %}?dish={{ dish.id }}"><span class="badge badge-pill badge-dish me-1">
                 {{ dish }}</span></a>
             {% endfor %}
             {% for label in recipe.label.all %}
-            <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
+                <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
                 {{ label }}</span></a>
             {% endfor %}
         </div>
