@@ -151,7 +151,7 @@ def generate_mealplan(request):
                     if meal_dict[day_name]['lunch']:
                         lunch_categories = set()
                         for meal_id in meal_dict[day_name]['lunch']:
-                            lunch_categories.update(get_recipe_categories(Recipe.objects.get(id=meal_id.id)))
+                            lunch_categories.update(get_recipe_categories(Recipe.objects.get(id=meal_id)))
 
                         remaining_categories = REQUIRED_CATEGORIES - lunch_categories
                         for category_key in sorted(category_groups.keys(), key=lambda x: -len(x.split('+'))):
@@ -214,8 +214,16 @@ def mealplan_result(request, meal_plan_id):
     meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
     # Determine if it is a single-day or weekly
     just_one_day = meal_plan.meal_plan_recipes.count() == 2
-    # Reconstruct meal_dict ## poi controlla se non ti stampa meal_dict più volte perché ora quando refresho duplica la lista. però effettivamente perché dovrei refreshare la stessa pagina
-    meal_dict = MEAL_DICTIONARY.copy() if not just_one_day else {'Today': {'lunch': [], 'dinner': []}}
+    # Reconstruct meal_dict
+    meal_dict = {'Today': {'lunch': [], 'dinner': []}} if just_one_day else {
+                'Monday': {'lunch': [], 'dinner': []},
+                'Tuesday': {'lunch': [], 'dinner': []},
+                'Wednesday': {'lunch': [], 'dinner': []},
+                'Thursday': {'lunch': [], 'dinner': []},
+                'Friday': {'lunch': [], 'dinner': []},
+                'Saturday': {'lunch': [], 'dinner': []},
+                'Sunday': {'lunch': [], 'dinner': []},
+    }
     for meal_plan_recipe in meal_plan.meal_plan_recipes.all().order_by('position'):
         meal_type = meal_plan_recipe.meal_type
         meal_dict[meal_plan_recipe.day][meal_type].append(meal_plan_recipe.recipe) if not just_one_day else meal_dict['Today'][meal_type].append(meal_plan_recipe.recipe)
