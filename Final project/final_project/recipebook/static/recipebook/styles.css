@@ -12,6 +12,14 @@
     margin-top: 10px;
     margin-bottom: 30px;
 }
+.title-website h4{
+    font-family: 'Georgia', serif;
+    font-size: 1.3em;
+    color: #6b4f3f;
+    font-weight: 550;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
 
 body {
     background-color: beige;
@@ -251,3 +259,7 @@ form[action*="/search/"] {
     border-color: #6b4f3f;
     color: #fff;
 }
+
+.form-inline label {
+    margin: 5px 10px 5px 0;
+  }

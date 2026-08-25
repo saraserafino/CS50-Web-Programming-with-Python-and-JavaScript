@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from django.http import JsonResponse
+import json
 from .forms import MealPlanForm
 from .models import MealPlan, MealPlanRecipe
 from recipebook.models import User, Recipe, Dish, Label, Ingredient
 from collections import defaultdict
 import random
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -268,15 +272,32 @@ def mealplan_result(request, meal_plan_id):
         'just_one_day': just_one_day
     })
 
+@csrf_exempt
+def update_positions(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        meal_plan_id = data.get('meal_plan_id')
+        order_data = data.get('order_data', [])
+
+        for item in order_data:
+            meal_plan_recipe = MealPlanRecipe.objects.get(id=item['meal_plan_recipe_id'])
+            meal_plan_recipe.position = item['new_position']
+            meal_plan_recipe.save()
+
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
 @login_required
 def save_mealplan(request, meal_plan_id):
     meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
 
-    # Check if the meal plan belongs to the anonymous user's session or user
-    if meal_plan.user is None and meal_plan.session_key == request.session.session_key:
+    if request.method == 'POST':
         # Associate the meal plan with the logged-in user
         meal_plan.user = request.user
         meal_plan.session_key = None # Clear session key after associating with user
+        # Get the custom name from the form, or use a default name
+        custom_name = request.POST.get('meal_plan_name', f'Meal Plan {meal_plan.id}')
+        meal_plan.name = custom_name
         meal_plan.save()
         messages.success(request, "Meal plan saved successfully!")
     else:
@@ -284,11 +305,16 @@ def save_mealplan(request, meal_plan_id):
 
     return redirect('mealplan_result', meal_plan_id=meal_plan.id)
 
-@login_required ## of course this is still to do
-def user_mealplan(request):
-    #meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
-    #user = get_object_or_404(User, username=username)
-    return render(request, 'mealplan/user_mealplan.html', {
-        #'username': user
-        #'meal_plan': meal_plan,
-    })
+@login_required
+def user_mealplans(request):
+    meal_plans = MealPlan.objects.filter(user=request.user).order_by('-created_at')
+
+    # Pagination split by 10 mealplans at time
+    paginator = Paginator(meal_plans, 10)
+    page_number = request.GET.get('page')
+    meals_in_page = paginator.get_page(page_number)
+
+    return render(request, 'mealplan/user_mealplans.html', {
+        'username': request.user,
+        'meals_in_page': meals_in_page
+        })

@@ -16,6 +16,8 @@ class MealPlan(models.Model):
     # Block meals the user likes
     is_locked = models.BooleanField(default=False)
 
+    name = models.CharField(max_length=50, default="Meal Plan")
+
     def __str__(self):
         return f"Meal Plan {self.id} (User: {self.user}, Session: {self.session_key}) created at {self.created_at}"
 
@@ -30,7 +32,7 @@ class MealPlanRecipe(models.Model):
     day = models.CharField(max_length=10, choices=[
         ('Monday', 'monday'),
         ('Tuesday', 'tuesday'),
-        ('Wednesday', '2ednesday'),
+        ('Wednesday', 'wednesday'),
         ('Thursday', 'thursday'),
         ('Friday', 'friday'),
         ('Saturday', 'saturday'),

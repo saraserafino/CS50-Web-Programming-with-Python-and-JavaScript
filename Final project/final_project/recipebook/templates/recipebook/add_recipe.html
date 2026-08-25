@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block body %}
+<div class="container mt-4">
     <div class="title-website">
         <h2>Add New Recipe</h2>
     </div>
@@ -53,13 +54,13 @@
             <label for="image">Upload an image:</label>
             <input type="file" name="image" class="form-control-file" id="image">
         </div>
-        <div class="form-group">
+        <div class="form-inline">
             <label for="url">Enter URL of the image: </label>
             <input type="text" name="url" class="form-control" id="url" placeholder="Enter URL of the image">
         </div>
-        
+
         <div class="form-inline">
-            <label for="base_portion" class="col-md-3">Enter the base number of portions:</label>
+            <label for="base_portion">Enter the base number of portions:</label>
             <input type="number" name="base_portion" class="form-control" id="base_portion" placeholder="Base portion" min="0">
         </div><br>
 
@@ -90,6 +91,7 @@
 
         <button type="submit" class="btn btn-success">Save</button>
     </form>
+</div>
 {% endblock %}
 
 {% block script %}

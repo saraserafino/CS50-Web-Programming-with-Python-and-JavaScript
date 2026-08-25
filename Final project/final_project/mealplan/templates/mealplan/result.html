@@ -4,9 +4,11 @@
 
 {% block body %}
 
-<h1>{% if just_one_day %}Your daily meal plan
-    {% else %}Your weekly meal plan
-    {% endif %}</h1><br>
+<div class="title-website">
+    <h2>{% if just_one_day %}Your daily meal plan
+        {% else %}Your weekly meal plan
+        {% endif %}</h2>
+</div><br>
 
 <div class="row" id="meal-plan-container">
     <!-- Single-day layout -->
@@ -135,17 +137,23 @@
 {% if user.is_authenticated %}
     <form method="post" action="{% url 'save_mealplan' meal_plan.id %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success mt-3">Save Meal Plan</button>
+        <div class="form-inline d-flex">
+            <label for="meal_plan_name">Meal Plan Name (optional):</label>
+            <input type="text" class="form-control" id="meal_plan_name" name="meal_plan_name" placeholder="e.g., Week 1-7 January">
+            <button type="submit" class="btn btn-success">Save Meal Plan</button>
+        </div>
     </form>
 {% else %}
-    <div class="alert alert-info mt-3">
+    <div class="alert alert-warning mt-3">
         <strong>Note:</strong> <a href="{% url 'login' %}">Log in</a> to save this meal plan to your account.
     </div>
 {% endif %}
 
 <div class="mt-4">
     <div class="grocery-header">
-        <h2>Grocery List</h2>
+        <div class="title-website">
+            <h2>Grocery List</h2>
+        </div>
         <div class="button-tooltip-container">
         <button class="copy-btn" id="copy-grocery-list" data-text="Copy ingredients" onclick="copy();">
             <span class="mingcute--copy-fill"></span>
@@ -176,6 +184,7 @@
 {% block script %}
 <!-- Pass the CSRF token to JavaScript -->
 <script>const csrftoken = '{{ csrf_token }}';</script>
+<script>const mealPlanId = '{{ meal_plan.id }}';</script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script type="module">
 import { Sortable, Swap } from 'sortablejs/modular/sortable.core.esm';

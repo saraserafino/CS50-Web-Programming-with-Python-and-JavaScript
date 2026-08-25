@@ -197,3 +197,43 @@
   break-inside: avoid; /* Prevent items from breaking across columns */
   padding: 0.5rem;
 }
+
+.page-item{
+  color: rgb(255, 149, 0);
+  display: block;
+  padding: .5rem .75rem;
+  margin-left: -1px;
+  line-height: 1.25;
+}
+.page-link{
+  border: none;
+}
+.page-link:hover {
+  color: rgb(225, 132, 3);
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+.title-website .btn-warning {
+  background-color: #8b5a3c;
+  border-color: #8b5a3c;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.title-website .btn-warning:hover {
+  background-color: #6b4f3f;
+  border-color: #6b4f3f;
+  color: #fff;
+}
+
+.list-group-item-action:hover {
+  background-color: rgb(255, 214, 118);
+  border-radius: 15px;
+}
+
+.form-inline .btn-success {
+  margin: 5px 20px 5px 10px;
+  border-radius: 15px;
+}

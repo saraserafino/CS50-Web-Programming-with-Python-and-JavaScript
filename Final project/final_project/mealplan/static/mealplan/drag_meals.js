@@ -5,15 +5,50 @@ document.querySelectorAll('.sortable-card').forEach(sortableCard => {
         handle: ".drag-handle",
         swap: true, // enable swapping instead of sorting
         filter: '.locked', // ignore locked cards
-        group: "card-meal",////TO FIX BC IT DOES NOT SAVE
-
+        group: "card-meal",
+        onEnd: function(evt) {
+            // Get the new order of cards
+            const newOrder = evt.to.querySelectorAll('.sortable-card');
+            var mealPlanId = mealPlanId;
+            // Prepare data to send to the server
+            const orderData = [];
+            newOrder.forEach((card, index) => {
+                const cardId = card.querySelector('.card-body').getAttribute('data-id');
+                orderData.push({
+                    meal_plan_recipe_id: cardId,
+                    new_position: index + 1
+                });
+            });
+            // Send AJAX request to update positions
+            fetch('/mealplan/update_positions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    meal_plan_id: mealPlanId,
+                    order_data: orderData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Positions updated successfully');
+                } else {
+                    console.error('Failed to update positions');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        },
         // Saving and restoring of the sort
         store: {
             get: function (sortable) {
                 var order = localStorage.getItem(sortable.options.group.name);
                 return order ? order.split('|') : [];
             },
-
             set: function (sortable) {
                 var order = sortable.toArray();
                 localStorage.setItem(sortable.options.group.name, order.join('|'));

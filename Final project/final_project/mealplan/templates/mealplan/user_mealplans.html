@@ -1,0 +1,50 @@
+{% extends "recipebook/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="title-website d-flex justify-content-between">
+        <h1>Your Meal Plans</h1>
+        <a href="{% url 'generate_mealplan' %}" class="btn btn-warning">Create New Meal Plan</a>
+    </div>
+    <br>
+    <div class="list-group">
+        {% for meal_plan in meals_in_page %}
+        <a href="{% url 'mealplan_result' meal_plan.id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ meal_plan.name }}</h5>
+                <small>{{ meal_plan.created_at|date:"Y.m.d H:i" }}</small>
+            </div>
+            <p class="mb-1">
+                {% if meal_plan.meal_plan_recipes.count == 2 %}
+                Daily Meal Plan
+                {% else %}
+                Weekly Meal Plan
+                {% endif %}
+            </p>
+        </a>
+        {% empty %}
+        <div class="alert alert-warning">You have no saved meal plans yet.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination d-flex justify-content-center">
+            {% if meals_in_page.has_previous %}
+            <li><a class="page-link" href="?page=1">&laquo;</a></li>
+            <li><a class="page-link" href="?page={{ meals_in_page.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            <li class="page-item">
+                Page {{ meals_in_page.number }} of {{ meals_in_page.paginator.num_pages }}
+            </li>
+
+            {% if meals_in_page.has_next %}
+            <li><a class="page-link" href="?page={{ meals_in_page.next_page_number }}">Next</a></li>
+            <li><a class="page-link" href="?page={{ meals_in_page.paginator.num_pages }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}
