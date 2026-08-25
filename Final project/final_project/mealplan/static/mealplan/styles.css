@@ -187,8 +187,8 @@
 /* Grocery list in grid instead of only one column */
 .grocery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
 }
 .grocery-grid .list-group {
   display: contents; /* Remove the <ul> from the grid layout */
@@ -214,15 +214,15 @@
   text-decoration: underline;
 }
 
-.title-website .btn-warning {
+.container .btn-warning {
   background-color: #8b5a3c;
   border-color: #8b5a3c;
   color: #fff;
-  padding: 12px 16px;
+  padding: 10px 8px;
   border-radius: 8px;
-  font-weight: 500;
+  font-weight: 400;
 }
-.title-website .btn-warning:hover {
+.container .btn-warning:hover {
   background-color: #6b4f3f;
   border-color: #6b4f3f;
   color: #fff;
@@ -236,4 +236,21 @@
 .form-inline .btn-success {
   margin: 5px 20px 5px 10px;
   border-radius: 15px;
+}
+
+.recipe-image-container-mealplan {
+  width: 190px;
+  height: 150px;
+  margin-bottom: -10px;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.note {
+  font-size: 0.95em;
+  font-weight: 200;
+  color: #6b4f3f;
+  margin-top: 20px;
+  margin-bottom: 30px;
 }

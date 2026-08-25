@@ -3,9 +3,13 @@
 
 {% block body %}
 <div class="container mt-4">
-    <div class="title-website d-flex justify-content-between">
-        <h1>Your Meal Plans</h1>
-        <a href="{% url 'generate_mealplan' %}" class="btn btn-warning">Create New Meal Plan</a>
+    <div class="d-flex justify-content-between">
+        <div class="title-website">
+            <h2>Your Meal Plans</h2>
+        </div>
+        <div class="top-0 right-0">
+            <a href="{% url 'generate_mealplan' %}" class="btn btn-warning btn-sm">Create New Plan</a>
+        </div>
     </div>
     <br>
     <div class="list-group">

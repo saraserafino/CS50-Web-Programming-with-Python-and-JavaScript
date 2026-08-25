@@ -60,6 +60,10 @@ a:hover {
     display: none;
 }
 
+.btn {
+    border-radius: 10px;
+}
+
 .recipe-image-container{
     width: 300px;
     height: 200px;
@@ -126,6 +130,7 @@ form[action*="/search/"] {
     white-space: pre-wrap;
     display: flex;
     word-wrap: break-word;
+    font-family: 'Georgia', serif;
 }
 
 /* Home page */
@@ -263,3 +268,30 @@ form[action*="/search/"] {
 .form-inline label {
     margin: 5px 10px 5px 0;
   }
+
+.btn-increase {
+    color: rgb(0, 200, 0)
+}
+.btn-increase:hover {
+    color: rgb(0, 145, 0);
+}
+.btn-decrease {
+    color: rgb(255, 78, 51)
+}
+.btn-decrease:hover {
+    color: rgb(198, 0, 0);
+}
+
+/* Ingredient list in grid instead of only one column */
+.ingredients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+  }
+.ingredients-grid .list-group {
+    display: contents; /* Remove the <ul> from the grid layout */
+}
+.ingredients-grid .list-group-item {
+    break-inside: avoid; /* Prevent items from breaking across columns */
+    padding: 0.5rem;
+}

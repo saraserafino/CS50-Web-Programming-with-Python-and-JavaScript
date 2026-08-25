@@ -23,7 +23,7 @@
                 <div class="card-body text-center" data-id="{{ lunchRecipe.id }}">
                     <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
                         <h6 class="card-title">{{ lunchRecipe.title }}</h6>
-                        <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                        <div class="recipe-image-container-mealplan">
                         <img class="card-img-top recipe-image" alt="{{ lunchRecipe.title }}" {% if lunchRecipe.url %} src="{{ lunchRecipe.url }}" {% else %} src="{{ lunchRecipe.image.url }}" {% endif %}>
                         </div>
                     </a>
@@ -47,7 +47,7 @@
                 <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}">
                     <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
                         <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
-                        <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                        <div class="recipe-image-container-mealplan">
                         <img class="card-img-top recipe-image" alt="{{ dinnerRecipe.title }}" {% if dinnerRecipe.url %} src="{{ dinnerRecipe.url }}" {% else %} src="{{ dinnerRecipe.image.url }}" {% endif %}>
                         </div>
                     </a>
@@ -66,7 +66,7 @@
     {% else %}
     {% for day in meal_dict.keys %}
     <div class="row mb-4">
-        <div class="day-header col-10 text-center mb-2">
+        <div class="day-header col-10 text-center">
             <h4>{{ day }}</h4>
         </div>
 
@@ -82,7 +82,7 @@
                         <div class="card-body text-center" data-id="{{ lunchRecipe.id }}" id=lunchRecipe.id>
                             <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
                                 <h6 class="card-title">{{ lunchRecipe.title }}</h6>
-                                <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                                <div class="recipe-image-container-mealplan">
                                 <img class="card-img-top recipe-image" alt="{{ lunchRecipe.title }}"
                                 {% if lunchRecipe.url %} src="{{ lunchRecipe.url }}"
                                 {% else %} src="{{ lunchRecipe.image.url }}" {% endif %}>
@@ -112,7 +112,7 @@
                         <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}" id=dinnerRecipe.id>
                             <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
                                 <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
-                                <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                                <div class="recipe-image-container-mealplan">
                                 <img class="card-img-top recipe-image" alt="{{ dinnerRecipe.title }}"
                                 {% if dinnerRecipe.url %} src="{{ dinnerRecipe.url }}"
                                 {% else %} src="{{ dinnerRecipe.image.url }}" {% endif %}>
