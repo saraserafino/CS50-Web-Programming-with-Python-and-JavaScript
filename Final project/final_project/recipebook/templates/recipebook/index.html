@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block body %}
-<h2>Recipes</h2>
+<div class="title-website">
+    <h2>Recipes</h2>
+</div>
 <br>
 
 <!-- User can filter the recipes, once done they are redirected to a page of filtered recipes. -->
@@ -35,7 +37,7 @@
     <button type="submit" class="btn btn-warning btn-sm">Apply filter</button>
 </form>
 
-<div class="row row-recipe row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 row-cols-xxl-5 g-3" id="recipes-container" data-initial-count="{{ recipes|length }}">
+<div class="row row-recipe row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 row-cols-xxl-5 g-3" id="recipes-container" data-initial-count="{{ recipes|length }}">
 {% for recipe in recipes %}
 <div class="card h-100">
     <!-- Clicking on a recipe takes user to its specific page -->

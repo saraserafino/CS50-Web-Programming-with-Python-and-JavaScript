@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block body %}
-    <h2>Add New Recipe</h2>
+    <div class="title-website">
+        <h2>Add New Recipe</h2>
+    </div>
     <br>
     <form action="{% url 'add_recipe' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}

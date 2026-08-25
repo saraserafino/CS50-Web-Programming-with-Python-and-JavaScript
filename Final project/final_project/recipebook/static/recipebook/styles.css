@@ -4,6 +4,14 @@
     color: #5a3e2b;
     font-weight: 600;
 }
+.title-website h2{
+    font-family: 'Georgia', serif;
+    font-size: 1.8em;
+    color: #6b4f3f;
+    font-weight: 550;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
 
 body {
     background-color: beige;

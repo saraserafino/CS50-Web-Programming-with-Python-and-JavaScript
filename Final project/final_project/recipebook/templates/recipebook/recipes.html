@@ -82,7 +82,9 @@
 To this scope, get_similar_recipes of the model Recipe is used, limiting to 4 recipes and first 3 ingredients. -->
 {% if similar_recipes %}
 <br><br>
-<h3>You might also like:</h3>
+<div class="title-website">
+    <h2>You might also like:</h2>
+</div>
 <div class="row row-recipe row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-4 row-cols-xxl-5 g-3">
     {% for recipe in similar_recipes %}
     <div class="card h-100">
