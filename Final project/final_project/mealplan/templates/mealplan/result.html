@@ -7,17 +7,6 @@
 <h1>{% if just_one_day %}Your daily meal plan
     {% else %}Your weekly meal plan
     {% endif %}</h1><br>
-{{ meal_dict }}
-<!-- Days header only for weekly plan -->
-{% if not just_one_day %}
-<div class="row text-center mb-3" id="days-header">
-    {% for day in meal_dict.keys %}
-    <div class="col">
-        <h4>{{ day }}</h4>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
 
 <div class="row" id="meal-plan-container">
     <!-- Single-day layout -->
@@ -74,57 +63,68 @@
     <!-- Weekly layout -->
     {% else %}
     {% for day in meal_dict.keys %}
-    <div class="col">
-        <div class="d-flex flex-column">
-            <div class="mb-2 card-wrap">
-                <div class="card-header text-center">
-                    <h5>{{ day }} Lunch</h5>
-                </div>
+    <div class="row mb-4">
+        <div class="day-header col-10 text-center mb-2">
+            <h4>{{ day }}</h4>
+        </div>
+
+        <!-- Lunch column -->
+        <div class="col-md-5 mb-3">
+            <div class="card-header text-center">
+                <h5>{{ day }} Lunch</h5>
+            </div>
             {% with day_meals=meal_dict|get_item:day %}
-            {% for lunchRecipe in day_meals.lunch %}
-                <div class="sortable-card card-meal h-100">
-                    <div class="card-body text-center" data-id="{{ lunchRecipe.id }}"> <!-- then put again id=lunchRecipe.id-->
-                        <a href="{% url 'recipes' id=3 %}" class="text-decoration-none text-dark">
-                            <h6 class="card-title">{{ lunchRecipe.title }}</h6>
-                            <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
-                            <img class="card-img-top recipe-image" alt="{{ lunchRecipe.title }}" {% if lunchRecipe.url %} src="{{ lunchRecipe.url }}" {% else %} src="{{ lunchRecipe.image.url }}" {% endif %}>
+                {% for lunchRecipe in day_meals.lunch %}
+                <div class="mb-2 card-wrap">
+                    <div class="sortable-card card-meal h-100">
+                        <div class="card-body text-center" data-id="{{ lunchRecipe.id }}" id=lunchRecipe.id>
+                            <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
+                                <h6 class="card-title">{{ lunchRecipe.title }}</h6>
+                                <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                                <img class="card-img-top recipe-image" alt="{{ lunchRecipe.title }}"
+                                {% if lunchRecipe.url %} src="{{ lunchRecipe.url }}"
+                                {% else %} src="{{ lunchRecipe.image.url }}" {% endif %}>
+                                </div>
+                            </a>
+                            <!-- Drag handle -->
+                            <div class="card-handle">
+                                <span class="iconify drag-handle ic--outline-drag-indicator"></span>
+                                <span class="lock-handle circum--unlock"></span>
                             </div>
-                        </a>
-                        <!-- Drag handle -->
-                        <div class="card-handle">
-                            <span class="iconify drag-handle ic--outline-drag-indicator"></span>
-                            <span class="lock-handle circum--unlock"></span>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
             {% endwith %}
+        </div>
 
-
-            <div class="mb-2 card-wrap">
-                <div class="card-header text-center">
-                    <h5>{{ day }} Dinner</h5>
-                </div>
+        <!-- Dinner column -->
+        <div class="col-md-5 mb-3">
+            <div class="card-header text-center">
+                <h5>{{ day }} Dinner</h5>
+            </div>
             {% with day_meals=meal_dict|get_item:day %}
-            {% for dinnerRecipe in day_meals.dinner %}
-                <div class="sortable-card card-meal h-100">
-                    <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}"> <!-- then put again id=dinnerRecipe.id-->
-                        <a href="{% url 'recipes' id=3 %}" class="text-decoration-none text-dark">
-                            <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
-                            <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
-                            <img class="card-img-top recipe-image" alt="{{ dinnerRecipe.title }}" {% if dinnerRecipe.url %} src="{{ dinnerRecipe.url }}" {% else %} src="{{ dinnerRecipe.image.url }}" {% endif %}>
+                {% for dinnerRecipe in day_meals.dinner %}
+                <div class="mb-2 card-wrap">
+                    <div class="sortable-card card-meal h-100">
+                        <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}" id=dinnerRecipe.id>
+                            <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
+                                <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
+                                <div class="recipe-image-container" style="width: 100px; height: 75px; margin: 0 auto;">
+                                <img class="card-img-top recipe-image" alt="{{ dinnerRecipe.title }}"
+                                {% if dinnerRecipe.url %} src="{{ dinnerRecipe.url }}"
+                                {% else %} src="{{ dinnerRecipe.image.url }}" {% endif %}>
+                                </div>
+                            </a>
+                            <!-- Drag handle -->
+                            <div class="card-handle">
+                                <span class="iconify drag-handle ic--outline-drag-indicator"></span>
+                                <span class="lock-handle circum--unlock"></span>
                             </div>
-                        </a>
-                        <!-- Drag handle -->
-                        <div class="card-handle">
-                            <span class="iconify drag-handle ic--outline-drag-indicator"></span>
-                            <span class="lock-handle circum--unlock"></span>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
             {% endwith %}
         </div>
     </div>

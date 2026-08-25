@@ -33,6 +33,46 @@
   transition: transform 0.2s var(--anim), box-shadow 0.2s var(--anim);
 }
 
+.day-header{
+  max-width: 600px;
+}
+.card-header {
+  max-width: 500px;
+}
+/* Responsive adjustments for day-header and card-header */
+@media (max-width: 1200px) {
+  .day-header {
+      max-width: 90%;
+  }
+  .card-header {
+      max-width: 90%;
+  }
+}
+@media (max-width: 992px) {
+  .day-header {
+      max-width: 95%;
+  }
+  .card-header {
+      max-width: 95%;
+  }
+}
+@media (max-width: 768px) {
+  .day-header {
+      max-width: 90%;
+  }
+  .card-header {
+      max-width: 45%;
+  }
+}
+@media (max-width: 600px) {
+  .day-header {
+      max-width: 90%;
+  }
+  .card-header {
+      max-width: 48%;
+  }
+}
+
 .drag-handle {
   position: absolute;
   top: 0.5rem;
