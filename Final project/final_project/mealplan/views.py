@@ -318,3 +318,18 @@ def user_mealplans(request):
         'username': request.user,
         'meals_in_page': meals_in_page
         })
+
+@login_required
+def delete_mealplan(request, meal_plan_id):
+    meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
+
+    # Check if the meal plan belongs to the user
+    if meal_plan.user != request.user:
+        messages.error(request, "You do not have permission to delete this meal plan.")
+        return redirect('user_mealplans')
+
+    # Delete the meal plan and all associated MealPlanRecipe objects
+    meal_plan.delete()
+    messages.success(request, "Meal plan deleted successfully!")
+
+    return redirect('user_mealplans')

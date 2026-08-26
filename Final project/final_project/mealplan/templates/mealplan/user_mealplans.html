@@ -19,13 +19,20 @@
                 <h5 class="mb-1">{{ meal_plan.name }}</h5>
                 <small>{{ meal_plan.created_at|date:"Y.m.d H:i" }}</small>
             </div>
-            <p class="mb-1">
-                {% if meal_plan.meal_plan_recipes.count == 2 %}
-                Daily Meal Plan
-                {% else %}
-                Weekly Meal Plan
-                {% endif %}
-            </p>
+            <div class="d-flex w-100 justify-content-between">
+                <p class="mb-1">
+                    {% if meal_plan.meal_plan_recipes.count == 2 %}
+                    Daily Meal Plan
+                    {% else %}
+                    Weekly Meal Plan
+                    {% endif %}
+                </p>
+
+                <form method="post" action="{% url 'delete_mealplan' meal_plan.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </div>
         </a>
         {% empty %}
         <div class="alert alert-warning">You have no saved meal plans yet.</div>
