@@ -1,6 +1,6 @@
 # Final project: recipe book & meal plan
 > [!NOTE]
-> Recipe book is finished, meal plan is a work in progress.
+> Recipe book is finished, meal plan is almost finished, some refinements are in progress.
 
 This web application is an online recipe book designed to help users discover, save, and manage recipes. Users can filter by recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
 For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility.
