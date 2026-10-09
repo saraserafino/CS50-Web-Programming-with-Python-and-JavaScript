@@ -26,15 +26,6 @@ CATEGORY_GROUPS = {
                 'protein+vegetables': [],
                 'carbohydrate+protein+vegetables': [],
             }
-MEAL_DICTIONARY = {
-        'Monday': {'lunch': [], 'dinner': []},
-        'Tuesday': {'lunch': [], 'dinner': []},
-        'Wednesday': {'lunch': [], 'dinner': []},
-        'Thursday': {'lunch': [], 'dinner': []},
-        'Friday': {'lunch': [], 'dinner': []},
-        'Saturday': {'lunch': [], 'dinner': []},
-        'Sunday': {'lunch': [], 'dinner': []},
-    }
 
 # Helper functions for generate_mealplan
 def get_recipe_categories(recipe):
@@ -42,7 +33,7 @@ def get_recipe_categories(recipe):
     return set(recipe.dish.values_list('dish_name', flat=True)) & REQUIRED_CATEGORIES
 
 def covers_categories(meal_ids):
-    """Check if a list of meal IDs covers all required categories."""
+    """Check if all required categories are covered, for a balanced mealplan."""
     covered_categories = set()
     for meal_id in meal_ids:
         if meal_id is None:
@@ -50,6 +41,13 @@ def covers_categories(meal_ids):
         recipe = Recipe.objects.get(id=meal_id)
         covered_categories.update(get_recipe_categories(recipe))
     return covered_categories >= REQUIRED_CATEGORIES
+
+def pick_from(pool, original_ids):
+    """Pop an ID from pool, refilling from (shuffled) original_ids when exhausted. Otherwise, when few recipes are generated, they cannot be reused."""
+    if not pool:
+        pool.extend(original_ids)
+        random.shuffle(pool)
+    return pool.pop() if pool else None
 
 def generate_mealplan(request):
     if request.method == 'POST':
@@ -107,43 +105,65 @@ def generate_mealplan(request):
             if not recipes.exists():
                 messages.error(request, "No recipes match your criteria. Please try different filters.")
                 return render(request, 'mealplan/mealplan_generation.html', {'form': form})
-            # If there are not enough recipes, repeat some to fill the meals
+            # If there are not enough recipes, repeat some to fill the meals ### questo ora si può rimuovere tecnciamente
             while len(meals_ids) < num_meals_to_generate:
                 meals_ids.extend(random.sample(meals_ids, min(num_meals_to_generate-len(meals_ids), len(meals_ids))))
 
             # Sort every filtered recipe per categories
-            category_groups = CATEGORY_GROUPS.copy()
+            category_groups = {k: [] for k in CATEGORY_GROUPS} # CATEGORY_GROUPS.copy() would be a shallow copy
+            category_groups_original = {k: [] for k in CATEGORY_GROUPS}
+            covered_categories = set()
             for recipe in recipes:
                 categories = get_recipe_categories(recipe)
                 if not categories:
-                    continue  # Skip recipes that don't cover any required category
+                    continue  # Skip recipes that do not cover any required category
+                covered_categories.update(categories)
 
                 category_key = '+'.join(sorted(categories))
                 if category_key in category_groups:
                     category_groups[category_key].append(recipe.id)
+                    category_groups_original[category_key].append(recipe.id)
+            # Check if all required categories are covered, for a balanced mealplan
+            if covered_categories < REQUIRED_CATEGORIES:
+                messages.warning(request,
+                    "This meal plan is not balanced: with the available ingredients, "
+                    "some required categories (protein, carbohydrate, vegetables) are missing.")
 
-            meal_dict = MEAL_DICTIONARY.copy() if not just_one_day else {'Today': {'lunch': [], 'dinner': []}}
             if just_one_day:
+                meal_dict = {'Today': {'lunch': [], 'dinner': []}}
                 # Randomly decide whether to use a single but complete recipe or separate recipes for a meal
                 # Lunch
                 if category_groups['carbohydrate+vegetables'] and random.choice([True,False]):
-                    meal_dict['Today']['lunch'].append(category_groups['carbohydrate+vegetables'].pop())
+                    meal_dict['Today']['lunch'].append(pick_from(category_groups['carbohydrate+vegetables'], category_groups_original['carbohydrate+vegetables']))
                 else:
-                    if category_groups['carbohydrate']:
-                        meal_dict['Today']['lunch'].append(category_groups['carbohydrate'].pop())
-                    if category_groups['vegetables']:
-                        meal_dict['Today']['lunch'].append(category_groups['vegetables'].pop())
+                    picked = pick_from(category_groups['carbohydrate'], category_groups_original['carbohydrate'])
+                    if picked:
+                        meal_dict['Today']['lunch'].append(picked)
+                    picked = pick_from(category_groups['vegetables'], category_groups_original['vegetables'])
+                    if picked:
+                        meal_dict['Today']['lunch'].append(picked)
                 # Dinner - again randomly decide whether single but complete or separate recipes
                 if category_groups['protein+vegetables'] and random.choice([True,False]):
-                    meal_dict['Today']['dinner'].append(category_groups['protein+vegetables'].pop())
+                    meal_dict['Today']['dinner'].append(pick_from(category_groups['protein+vegetables'], category_groups_original['protein+vegetables']))
                 else: # Otherwise, pick separate protein and vegetables recipes
-                    if category_groups['protein']:
-                        meal_dict['Today']['dinner'].append(category_groups['protein'].pop())
-                    if category_groups['vegetables']:
-                        meal_dict['Today']['dinner'].append(category_groups['vegetables'].pop())
+                    picked = pick_from(category_groups['protein'], category_groups_original['protein'])
+                    if picked:
+                        meal_dict['Today']['dinner'].append(picked)
+                    picked = pick_from(category_groups['vegetables'], category_groups_original['vegetables'])
+                    if picked:
+                        meal_dict['Today']['dinner'].append(picked)
 
             # Weekly meal plan
             else:
+                meal_dict = {
+                            'Monday': {'lunch': [], 'dinner': []},
+                            'Tuesday': {'lunch': [], 'dinner': []},
+                            'Wednesday': {'lunch': [], 'dinner': []},
+                            'Thursday': {'lunch': [], 'dinner': []},
+                            'Friday': {'lunch': [], 'dinner': []},
+                            'Saturday': {'lunch': [], 'dinner': []},
+                            'Sunday': {'lunch': [], 'dinner': []},
+                        }
                 # Generate meals for each day
                 for day_index, day_name in enumerate(meal_dict.keys()):
                     # if include_leftovers and it's not Monday or weekend, lunch is the previous day's dinner
@@ -163,7 +183,7 @@ def generate_mealplan(request):
                                 continue # Skip recipes that don't cover any required category
                             recipe_categories = set(category_key.split('+'))
                             if recipe_categories & remaining_categories:
-                                meal_dict[day_name]['dinner'].append(category_groups[category_key].pop())
+                                meal_dict[day_name]['dinner'].append(pick_from(category_groups[category_key], category_groups_original[category_key]))
                                 remaining_categories -= recipe_categories
                                 if not remaining_categories:
                                     break
@@ -171,27 +191,35 @@ def generate_mealplan(request):
                         if not meal_dict[day_name]['dinner']:
                             # Then, randomly chose protein or carbohydrate and then a vegetable
                             if random.choice([True,False]):
-                                meal_dict[day_name]['dinner'].append(category_groups['protein'].pop())
+                                picked = pick_from(category_groups['protein'], category_groups_original['protein'])
                             else:
-                                meal_dict[day_name]['dinner'].append(category_groups['carbohydrate'].pop())
-                            meal_dict[day_name]['dinner'].append(category_groups['vegetables'].pop())
+                                picked = pick_from(category_groups['carbohydrate'], category_groups_original['carbohydrate'])
+                            if picked:
+                                meal_dict[day_name]['dinner'].append(picked)
+                            picked = pick_from(category_groups['vegetables'], category_groups_original['vegetables'])
+                            if picked:
+                                meal_dict[day_name]['dinner'].append(picked)
 
                     else: # Generate both lunch (carbohydrate + vegetables) and dinner (protein + vegetables) - again randomly decide whether single but complete or separate recipes
                         if category_groups['carbohydrate+vegetables'] and random.choice([True,False]):
-                            meal_dict[day_name]['lunch'].append(category_groups['carbohydrate+vegetables'].pop())
+                            meal_dict[day_name]['lunch'].append(pick_from(category_groups['carbohydrate+vegetables'], category_groups_original['carbohydrate+vegetables']))
                         else:
-                            if category_groups['carbohydrate']:
-                                meal_dict[day_name]['lunch'].append(category_groups['carbohydrate'].pop())
-                            if category_groups['vegetables']:
-                                meal_dict[day_name]['lunch'].append(category_groups['vegetables'].pop())
+                            picked = pick_from(category_groups['carbohydrate'], category_groups_original['carbohydrate'])
+                            if picked:
+                                meal_dict[day_name]['lunch'].append(picked)
+                            picked = pick_from(category_groups['vegetables'], category_groups_original['vegetables'])
+                            if picked:
+                                meal_dict[day_name]['lunch'].append(picked)
 
                         if category_groups['protein+vegetables'] and random.choice([True,False]):
-                            meal_dict[day_name]['dinner'].append(category_groups['protein+vegetables'].pop())
+                            meal_dict[day_name]['dinner'].append(pick_from(category_groups['protein+vegetables'],category_groups_original['carbohydrate+vegetables']))
                         else:
-                            if category_groups['protein']:
-                                meal_dict[day_name]['dinner'].append(category_groups['protein'].pop())
-                            if category_groups['vegetables']:
-                                meal_dict[day_name]['dinner'].append(category_groups['vegetables'].pop())
+                            picked = pick_from(category_groups['protein'],category_groups_original['protein'])
+                            if picked:
+                                meal_dict[day_name]['dinner'].append(picked)
+                            picked = pick_from(category_groups['vegetables'], category_groups_original['vegetables'])
+                            if picked:
+                                meal_dict[day_name]['dinner'].append(picked)
 
             # Save the meal plan with lunch and dinner distinctions
             position = 1
