@@ -3,13 +3,27 @@ $(".chosen-select").chosen({width: "20%"})
 
 // Infinite scrolling
 // Start with first recipes and load 20 per time when the DOM loads
-let counter = document.querySelectorAll('#recipes-container > .card').length;
+const container = document.getElementById('recipes-container');
+let counter = container.querySelectorAll(':scope > .card').length;
 const quantity = 20;
-document.addEventListener('DOMContentLoaded', load);
-// If scrolled to bottom, load the next 20 recipes
-window.onscroll = () => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) { load(); }
-};
+let loading = false;
+let done = false;
+
+// Sentinel below the container so that when it comes into view, it loads more
+const sentinel = document.createElement('div');
+sentinel.style.textAlign = 'center';
+sentinel.style.margin = '20px';
+sentinel.innerHTML = `
+    <div class="spinner-border text-warning" role="status" hidden>
+        <span class="sr-only">Loading...</span>
+    </div>`;
+container.after(sentinel);
+const spinner = sentinel.firstElementChild;
+
+const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) load();
+}, { rootMargin: '400px' }); // loads a bit before the real bottom of the page
+
 // Add new recipes with given data to DOM
 function add_recipe_js(recipe) {
     // Create new recipe card
@@ -52,59 +66,45 @@ function add_recipe_js(recipe) {
     // Append the recipe card to the container
     document.getElementById('recipes-container').appendChild(recipeCard);
 };
-// Load next set of recipes
-function load() {
-    // Set start and end recipe numbers, and update counter
-    const start = counter;
-    const end = start + quantity - 1;
-    counter = end + 1;
 
-    // Show loading indicator
-    const loadingIndicator = document.createElement('div');
-    loadingIndicator.id = 'loading-indicator';
-    loadingIndicator.style.textAlign = 'center';
-    loadingIndicator.style.margin = '20px';
-    loadingIndicator.innerHTML = `
-        <div class="spinner-border text-warning" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
-    `;
-    document.getElementById('recipes-container').appendChild(loadingIndicator);
+// Load next set of recipes
+async function load() {
+    if (loading || done) return;
+    loading = true;
+    spinner.hidden = false;
 
     // Get the current URL's query parameters (e.g., ?dish=1&label=2)
-    const currentParams = new URLSearchParams(window.location.search);
-    let fetchUrl = `?start=${start}&end=${end}`;
-    // Append existing filter parameters to the fetch URL
-    currentParams.forEach((value, key) => {
-        if (key !== 'start' && key !== 'end') {
-            fetchUrl += `&${key}=${value}`;
-        }
-    });
+    const params = new URLSearchParams(window.location.search);
+    // Set start and end recipe numbers
+    params.set('start', counter);
+    params.set('end', counter + quantity - 1);
 
-    // Fetch new recipes with the updated URL
-    fetch(fetchUrl, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Remove loading indicator
-        document.getElementById('loading-indicator').remove();
-        if (data.recipes.length > 0) {
-            // Add new recipes to the DOM
-            data.recipes.forEach(add_recipe_js);
-            // Stop fetching if no more recipes are available
-            if (!data.has_more) {
-                window.onscroll = null;
-            }
+    try {
+        // Append existing filter parameters to the fetched URL
+        const response = await fetch(`?${params}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        data.recipes.forEach(add_recipe_js);
+        counter += data.recipes.length; // advance only on success
+
+        if (!data.has_more || data.recipes.length === 0) {
+            done = true;
+            observer.disconnect();
+            sentinel.remove();
         } else {
-            // No more recipes to load
-            window.onscroll = null;
+// Re-observe: fires immediately if the sentinel is still visible (page not tall enough yet), so loading continues without scrolling
+            observer.unobserve(sentinel);
+            observer.observe(sentinel);
         }
-    })
-    .catch(error => {
-        console.error('Error fetching data:', error);
-        document.getElementById('loading-indicator').remove();
-    });
+    } catch (error) {
+        console.error('Error fetching recipes:', error);
+    } finally {
+        loading = false;
+        spinner.hidden = true;
+    }
 }
+
+observer.observe(sentinel); // replaces window.onscroll and the DOMContentLoaded load()

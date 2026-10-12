@@ -15,33 +15,32 @@ def infinite_scrolling(request, recipes):
     # Get start and end points for infinite scrolling
     start = int(request.GET.get("start") or 0)
     end = int(request.GET.get("end") or (start + 19))
-    # Slice the recipes
-    recipes = recipes[start:end+1]
     # Artificially delay speed of response
-    time.sleep(1)
+    #time.sleep(1)
 
     # Handle AJAX requests for infinite scrolling
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        recipes_data = []
-        for recipe in recipes:
-            recipes_data.append({
-                'id': recipe.id,
-                'title': recipe.title,
-                'image_url': recipe.url if recipe.url else recipe.image.url,
-                'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
-                'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
-                'is_new': recipe.is_new,
-            })
-        return JsonResponse({'recipes': recipes_data, 'has_more': len(recipes) == (end - start + 1)})
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return None
 
-    return None
+    total = recipes.count()
+    page = recipes.prefetch_related("dish", "label")[start:end + 1]
+
+    recipes_data = [{
+        'id': recipe.id,
+        'title': recipe.title,
+        'image_url': recipe.url if recipe.url else recipe.image.url,
+        'dishes': [{'id': dish.id, 'dish_name': dish.dish_name} for dish in recipe.dish.all()],
+        'labels': [{'id': label.id, 'label_name': label.label_name} for label in recipe.label.all()],
+        'is_new': recipe.is_new,
+        } for recipe in page]
+    return JsonResponse({'recipes': recipes_data, 'has_more': end + 1 < total})
 
 def index(request):
     dishes = Dish.objects.all()
     labels = Label.objects.all()
     # Show recipes from newest
     recipes = Recipe.objects.all().order_by("id").reverse()
-
+ 
     response = infinite_scrolling(request, recipes)
     if response:
         return response
