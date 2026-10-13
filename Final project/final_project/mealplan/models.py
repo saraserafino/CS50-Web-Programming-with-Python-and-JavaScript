@@ -13,8 +13,6 @@ class MealPlan(models.Model):
     session_key = models.CharField(max_length=40, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     recipes = models.ManyToManyField(Recipe, blank=True, related_name="meal_plans")
-    # Block meals the user likes
-    is_locked = models.BooleanField(default=False)
 
     name = models.CharField(max_length=50, default="Meal Plan")
 

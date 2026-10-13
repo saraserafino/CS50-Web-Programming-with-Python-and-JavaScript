@@ -59,12 +59,6 @@ def generate_mealplan(request):
             include_leftovers = form.cleaned_data.get('include_leftovers', False)
             just_one_day = form.cleaned_data.get('just_one_day', False)
 
-            # Allow anonymous users
-            meal_plan = MealPlan.objects.create(
-                user=request.user if request.user.is_authenticated else None,
-                session_key=request.session.session_key if not request.user.is_authenticated else None,
-            )
-
             # Base queryset for recipes
             recipes = Recipe.objects.all()
 
@@ -105,9 +99,6 @@ def generate_mealplan(request):
             if not recipes.exists():
                 messages.error(request, "No recipes match your criteria. Please try different filters.")
                 return render(request, 'mealplan/mealplan_generation.html', {'form': form})
-            # If there are not enough recipes, repeat some to fill the meals ### questo ora si può rimuovere tecnciamente
-            while len(meals_ids) < num_meals_to_generate:
-                meals_ids.extend(random.sample(meals_ids, min(num_meals_to_generate-len(meals_ids), len(meals_ids))))
 
             # Sort every filtered recipe per categories
             category_groups = {k: [] for k in CATEGORY_GROUPS} # CATEGORY_GROUPS.copy() would be a shallow copy
@@ -221,12 +212,21 @@ def generate_mealplan(request):
                             if picked:
                                 meal_dict[day_name]['dinner'].append(picked)
 
+
+
+            # Allow anonymous users
+            meal_plan = MealPlan.objects.create(
+                user=request.user if request.user.is_authenticated else None,
+                session_key=request.session.session_key if not request.user.is_authenticated else None,
+            )
+
             # Save the meal plan with lunch and dinner distinctions
             position = 1
             for day_name in meal_dict.keys():
                 for meal_type in ['lunch', 'dinner']:
                     for recipe_id in meal_dict[day_name][meal_type]:
                         recipe = Recipe.objects.get(id=recipe_id)
+                        meal_plan.recipes.add(recipe)
                         MealPlanRecipe.objects.create(
                             meal_plan=meal_plan,
                             recipe=recipe,
@@ -302,18 +302,19 @@ def mealplan_result(request, meal_plan_id):
 
 @csrf_exempt
 def update_positions(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        meal_plan_id = data.get('meal_plan_id')
-        order_data = data.get('order_data', [])
+    if request.method != 'POST':
+        return JsonResponse({'success': False}, status=400)
 
-        for item in order_data:
-            meal_plan_recipe = MealPlanRecipe.objects.get(id=item['meal_plan_recipe_id'])
-            meal_plan_recipe.position = item['new_position']
-            meal_plan_recipe.save()
+    data = json.loads(request.body)
+    meal_plan_id = data.get('meal_plan_id')
+    order_data = data.get('order_data', [])
 
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
+    for item in order_data:
+        meal_plan_recipe = MealPlanRecipe.objects.get(id=item['meal_plan_recipe_id'])
+        meal_plan_recipe.position = item['new_position']
+        meal_plan_recipe.save()
+
+    return JsonResponse({'success': True})
 
 @login_required
 def save_mealplan(request, meal_plan_id):
