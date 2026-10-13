@@ -38,9 +38,22 @@
             <a href="{% url 'display_filters' %}?label={{ label.id }}"><span class="badge badge-pill badge-label me-1">
                 {{ label }}</span></a>
             {% endfor %}
+
             {% if recipes.is_new %}
+            <br>
+            <!-- Superuser can approve a new recipe -->
+            {% if user.is_superuser %}
+                <form method="POST" action="{% url 'toggle_is_new' recipes.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="badge badge-pill badge-approve me-1"
+                            title="Click to approve this recipe">
+                        ✔
+                    </button>
+                </form>
+            {% endif %}
             <a href="{% url 'display_filters' %}?recipe_status=new"><span class="badge badge-pill badge-new me-1">
-                This recipe hasn't been approved by Prociona yet</span></a>
+                This recipe hasn't been approved by Prociona yet</span>
+            </a>
             {% endif %}
         </div>
 

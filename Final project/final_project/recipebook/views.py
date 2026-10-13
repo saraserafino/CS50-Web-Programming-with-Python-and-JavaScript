@@ -293,3 +293,16 @@ def edit_recipe(request, recipe_id):
             return JsonResponse({"success": False, "error": "Procedure cannot be empty."}, status=400)
 
     return JsonResponse({"success": False, "error": "Invalid request method."}, status=400)
+
+# The super user can approve a new recipe
+@user_passes_test(lambda u: u.is_superuser)
+def toggle_is_new(request, recipe_id):
+    if request.method == "POST":
+        try:
+            recipe = Recipe.objects.get(pk=recipe_id)
+        except Recipe.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Recipe not found."}, status=404)
+    recipe.is_new = not recipe.is_new
+    recipe.save(update_fields=["is_new"])
+
+    return redirect('recipes', id=recipe.id)

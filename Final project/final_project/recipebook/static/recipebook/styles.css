@@ -116,6 +116,13 @@ a:hover {
     background-color: rgb(255, 156, 255);
     color: rgb(55, 47, 42);
 }
+.badge-approve {
+    background-color: rgb(255, 156, 255);
+}
+.badge-approve:hover {
+    background-color: rgb(31, 186, 67);
+}
+
 
 form[action*="/search/"] {
     width: 300px;
