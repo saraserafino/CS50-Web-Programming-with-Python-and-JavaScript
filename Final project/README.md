@@ -2,29 +2,46 @@
 > [!NOTE]
 > Recipe book is finished, meal plan is almost finished, some refinements are in progress.
 
-This web application is an online recipe book designed to help users discover, save, and manage recipes. Users can filter by recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
-For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility.
+This web application is an online recipe book and meal planner, the workings of which are explained on the homepage. The former is designed to help users discover and save recipes, while the latter generates a balanced meal plan based on user's inputs.<br>
+Users can filter recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
+For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility. Moreover, they can check off the ingredients to track what they have already used. After each recipe, a maximum of four recipes is recommended based on the first four ingredients.
+
+<p align="center">
+  <img src="final_project/media/images/homepage.png" /><br>
+ Homepage explains recipe book and meal plan generation.
+</p>
+
+<p align="center">
+  <img src="final_project/media/images/recipes.png" /><br>
+ Recipes page.
+</p>
+
+<p align="center">
+  <img src="final_project/media/images/mealplan_generator.png" /><br>
+ Meal plan generation.
+</p>
 
 ## Distinctiveness and Complexity
 While the project interface of the recipe book has some front-end similarities with the [e-commerce project](https://cs50.harvard.edu/web/projects/2/commerce/) (e.g., filtering items by category and adding them to a watchlist), it introduces several unique features and complexities to differentiate itself:
 
 1. Infinite scroll: recipes load dynamically as the user scrolls, improving the browsing experience and reducing page load times.
-2. Similar Recipe Recommendations: at the end of each recipe page, the application suggests a maximum of 4 similar recipes based on shared dish labels and the first 3 ingredients. This feature enhances user engagement by helping them discover new recipes.
+2. Similar Recipe Recommendations: at the end of each recipe page, the application suggests a maximum of 4 similar recipes based on shared dish labels and the first 4 ingredients. This feature enhances user engagement by helping them discover new recipes.
 3. Portion scaling: users can increase or decrease the portion size of a recipe, and the ingredient quantities are automatically recalculated to maintain the correct proportions.
 4. Ingredient checklist: users can temporarily check off ingredients as they add them, acting as a reminder for what has already been included.
 
 Above all, the most distinctive and complex implemented feature is the creation of a balanced **meal plan**, either for a day or a week. The user can:
 - Choose random generation or
-- Select the ingredients they already have and decide whether to use only them or possibly buy others;
+- Select the ingredients they already have and decide whether to use only them or possibly buy others. To facilitate this procedure, some basic ingredients are already present;
 - Specify a label (vegan, vegetarian, gluten-free);
-- Specify whether they would like to prepare more dinner to have lunch the day after;
-- Specify how many new recipes they want to include.
+- Specify whether they would like to prepare more dinner to have lunch the day after.
 
-When presented the plan:
-- User can change the position of a meal;
-- User can block meals they like and generate others until they are satisfied.
+In case the user does not chose enough binding ingredients to generated a balanced meal plan, they are warned about it.
 
-Then, an interactive grocery shopping list is presented, enabling the user to tick off food they already have; the rest of the list can be saved as a text to export.
+When presented the plan, users can change the position of a meal and name the plan, which will be visible in the "Meal Plans" page accessible on the top right of the webpage.
+
+Then, an interactive grocery shopping list is presented, enabling the user to check off food they already have; the list can be saved as a text to export.
+
+The super user has some extra features. The most important one being the "Add recipe" page on the top right of the webpage (not visible to normal users). To do so, the super user inserts the quantity of each ingredient and selects the unit of measure (grams, ml, teaspoon, tablespoon, pieces or by heart). As per the image, they can either insert a file from their device, or an URL. Lastly, they assign the base number of portions, dish type, label and whether they have already tried the recipe or not. Every recipe can be modified through Django administration, but the procedure and approval of a recipe are also modifiable on each recipe page.
 
 ### Back-End Complexity
 Although the design may seem similar to previous projects (e.g., search functionality and random page generation), the back-end logic is significantly more complex:
@@ -38,12 +55,13 @@ Although the design may seem similar to previous projects (e.g., search function
 ## Technologies Used
 - **Front-End**:
   - HTML, CSS, JavaScript
-  - [Bootstrap](https://getbootstrap.com/) for responsive design
-  - [Chosen](https://harvesthq.github.io/chosen/) for user-friendly multi-select dropdowns
+  - [Bootstrap](https://getbootstrap.com/) for responsive design;
+  - [Chosen](https://harvesthq.github.io/chosen/) for user-friendly multi-select dropdowns;
+  - [Sortable](https://github.com/SortableJS/Sortable) for changing the position of each meal in the generated meal plan.
 - **Back-End**:
-  - [Django](https://www.djangoproject.com/) (Python web framework)
-  - [Django Admin](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/) for backend management
-  - [SQLite](https://www.sqlite.org/index.html) (default Django database)
+  - [Django](https://www.djangoproject.com/) as Python web framework;
+  - [Django Admin](https://docs.djangoproject.com/en/5.0/ref/contrib/admin/) for backend management;
+  - [SQLite](https://www.sqlite.org/index.html) as default Django database.
 
 ## Code organisation
 ### Models
@@ -58,7 +76,7 @@ The application includes the following models:
   - A **`base_portion`** field to define the default portion size.
   - Methods for **listing ingredients** and **getting similar recipes**.
 - **`RecipeIngredient`**: an **intermediary model** for the many-to-many relationship between `Recipe` and `Ingredient`, storing **quantity** and **unit of measure**.
-- **`MealPlan`**: allows users to save recipes to a meal plan.
+- **`MealPlan`** and **`MealPlanRecipe`**: allow users to save recipes to a meal plan.
 
 ### Views and Templates
 - **`index`**: displays all recipes with a badge for each type of dish and dietary label which redirects to a filtered index page when clicked.
@@ -77,7 +95,7 @@ The application includes the following models:
 - **Images**: personally uploaded recipe images are stored in the `media` directory, while others are public urls.
 - 
 ## How to run
+Clone the repository and run the following command inside the folder "Final project/final_project":
 ```bash
 python manage.py runserver
 ```
-Note to self: requirements.txt for possible Python packages to install
