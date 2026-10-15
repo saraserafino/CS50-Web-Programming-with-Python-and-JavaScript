@@ -19,8 +19,8 @@
         </div>
         {% for lunchRecipe in meal_dict.Today.lunch %}
         <div class="mb-2 card-wrap">
-            <div class="sortable-card card-meal h-100">
-                <div class="card-body text-center" data-id="{{ lunchRecipe.id }}">
+            <div class="sortable-card card-meal h-100" data-day="Today" data-meal-type="lunch">
+                <div class="card-body text-center" data-id="{{ lunchRecipe.mpr_id }}">
                     <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
                         <h6 class="card-title">{{ lunchRecipe.title }}</h6>
                         <div class="recipe-image-container-mealplan">
@@ -43,8 +43,8 @@
         </div>
         {% for dinnerRecipe in meal_dict.Today.dinner %}
         <div class="mb-2 card-wrap">
-            <div class="sortable-card card-meal h-100">
-                <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}">
+            <div class="sortable-card card-meal h-100" data-day="Today" data-meal-type="dinner">
+                <div class="card-body text-center" data-id="{{ dinnerRecipe.mpr_id }}">
                     <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
                         <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
                         <div class="recipe-image-container-mealplan">
@@ -78,8 +78,8 @@
             {% with day_meals=meal_dict|get_item:day %}
                 {% for lunchRecipe in day_meals.lunch %}
                 <div class="mb-2 card-wrap">
-                    <div class="sortable-card card-meal h-100">
-                        <div class="card-body text-center" data-id="{{ lunchRecipe.id }}" id=lunchRecipe.id>
+                    <div class="sortable-card card-meal h-100" data-day="{{ day }}" data-meal-type="lunch">
+                        <div class="card-body text-center" data-id="{{ lunchRecipe.mpr_id }}">
                             <a href="{% url 'recipes' id=lunchRecipe.id %}" class="text-decoration-none text-dark">
                                 <h6 class="card-title">{{ lunchRecipe.title }}</h6>
                                 <div class="recipe-image-container-mealplan">
@@ -108,8 +108,8 @@
             {% with day_meals=meal_dict|get_item:day %}
                 {% for dinnerRecipe in day_meals.dinner %}
                 <div class="mb-2 card-wrap">
-                    <div class="sortable-card card-meal h-100">
-                        <div class="card-body text-center" data-id="{{ dinnerRecipe.id }}" id=dinnerRecipe.id>
+                    <div class="sortable-card card-meal h-100" data-day="{{ day }}" data-meal-type="dinner">
+                        <div class="card-body text-center" data-id="{{ dinnerRecipe.mpr_id }}">
                             <a href="{% url 'recipes' id=dinnerRecipe.id %}" class="text-decoration-none text-dark">
                                 <h6 class="card-title">{{ dinnerRecipe.title }}</h6>
                                 <div class="recipe-image-container-mealplan">
@@ -185,10 +185,6 @@
 <!-- Pass the CSRF token to JavaScript -->
 <script>const csrftoken = '{{ csrf_token }}';</script>
 <script>const mealPlanId = '{{ meal_plan.id }}';</script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-<script type="module">
-import { Sortable, Swap } from 'sortablejs/modular/sortable.core.esm';
-Sortable.mount(new Swap());
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script src="{% static 'mealplan/drag_meals.js' %}"></script>
 {% endblock %}

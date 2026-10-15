@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse
 import json
@@ -212,8 +211,6 @@ def generate_mealplan(request):
                             if picked:
                                 meal_dict[day_name]['dinner'].append(picked)
 
-
-
             # Allow anonymous users
             meal_plan = MealPlan.objects.create(
                 user=request.user if request.user.is_authenticated else None,
@@ -257,8 +254,11 @@ def mealplan_result(request, meal_plan_id):
                 'Sunday': {'lunch': [], 'dinner': []},
     }
     for meal_plan_recipe in meal_plan.meal_plan_recipes.all().order_by('position'):
-        meal_type = meal_plan_recipe.meal_type
-        meal_dict[meal_plan_recipe.day][meal_type].append(meal_plan_recipe.recipe) if not just_one_day else meal_dict['Today'][meal_type].append(meal_plan_recipe.recipe)
+        recipe = meal_plan_recipe.recipe
+        # drag_meals.js needs the MealPlanRecipe id (not the Recipe id) to save the new positions
+        recipe.mpr_id = meal_plan_recipe.id
+        day = 'Today' if just_one_day else meal_plan_recipe.day
+        meal_dict[day][meal_plan_recipe.meal_type].append(recipe)
 
     # Check if the meal plan belongs to the user or their session
     if request.user.is_authenticated:
@@ -300,19 +300,29 @@ def mealplan_result(request, meal_plan_id):
         'just_one_day': just_one_day
     })
 
-@csrf_exempt
 def update_positions(request):
     if request.method != 'POST':
         return JsonResponse({'success': False}, status=400)
 
     data = json.loads(request.body)
-    meal_plan_id = data.get('meal_plan_id')
+    meal_plan = get_object_or_404(MealPlan, id=data.get('meal_plan_id'))
     order_data = data.get('order_data', [])
 
+    # Only the owner (user or anonymous session) can reorder the meal plan
+    if request.user.is_authenticated:
+        is_owner = meal_plan.user == request.user
+    else:
+        is_owner = meal_plan.session_key == request.session.session_key
+    if not is_owner:
+        return JsonResponse({'success': False}, status=403)
+
+    # Save position, day and meal type, since mealplan_result places each card using day and meal_type
     for item in order_data:
-        meal_plan_recipe = MealPlanRecipe.objects.get(id=item['meal_plan_recipe_id'])
-        meal_plan_recipe.position = item['new_position']
-        meal_plan_recipe.save()
+        MealPlanRecipe.objects.filter(id=item['meal_plan_recipe_id'], meal_plan=meal_plan).update(
+            position=item['new_position'],
+            day=item['day'],
+            meal_type=item['meal_type'],
+        )
 
     return JsonResponse({'success': True})
 

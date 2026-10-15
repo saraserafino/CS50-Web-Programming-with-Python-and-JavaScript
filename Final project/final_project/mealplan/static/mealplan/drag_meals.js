@@ -6,17 +6,17 @@ document.querySelectorAll('.sortable-card').forEach(sortableCard => {
         swap: true, // enable swapping instead of sorting
         filter: '.locked', // ignore locked cards
         group: "card-meal",
-        onEnd: function(evt) {
-            // Get the new order of cards
-            const newOrder = evt.to.querySelectorAll('.sortable-card');
-            var mealPlanId = mealPlanId;
-            // Prepare data to send to the server
+        onEnd: function() {
+            // Read every card in page order, with the day and meal of the slot it now sits in
             const orderData = [];
-            newOrder.forEach((card, index) => {
-                const cardId = card.querySelector('.card-body').getAttribute('data-id');
-                orderData.push({
-                    meal_plan_recipe_id: cardId,
-                    new_position: index + 1
+            document.querySelectorAll('.sortable-card').forEach(slot => {
+                slot.querySelectorAll('.card-body').forEach(card => {
+                    orderData.push({
+                        meal_plan_recipe_id: card.dataset.id,
+                        day: slot.dataset.day,
+                        meal_type: slot.dataset.mealType,
+                        new_position: orderData.length + 1
+                    });
                 });
             });
             // Send AJAX request to update positions
@@ -42,17 +42,6 @@ document.querySelectorAll('.sortable-card').forEach(sortableCard => {
             .catch(error => {
                 console.error('Error:', error);
             });
-        },
-        // Saving and restoring of the sort
-        store: {
-            get: function (sortable) {
-                var order = localStorage.getItem(sortable.options.group.name);
-                return order ? order.split('|') : [];
-            },
-            set: function (sortable) {
-                var order = sortable.toArray();
-                localStorage.setItem(sortable.options.group.name, order.join('|'));
-            }
         }
     });
 });
