@@ -4,7 +4,7 @@
 
 This web application is an online recipe book and meal planner, the workings of which are explained on the homepage. The former is designed to help users discover and save recipes, while the latter generates a balanced meal plan based on users' inputs.<br>
 Users can filter recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
-For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility. Moreover, they can check off the ingredients to track what they have already used. After each recipe, other similar recipes are recommended based on the first four ingredients.
+For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility. Moreover, they can check off the ingredients to track what they have already used. After each recipe, other similar recipes are recommended.
 
 <p align="center">
   <img src="final_project/media/images/homepage.png" /><br>
@@ -13,35 +13,45 @@ For every recipe, users can adjust the portion size, and the ingredient quantiti
 
 <p align="center">
   <img src="final_project/media/images/recipes.png" /><br>
- Recipes page, where users can filter by dish, label and approval status, or search by words.
+ Recipes page, where users can filter by dish, label and approval status, or search by words.<br>
+ When a user is logged in, they can access the personal pages "Favourite recipes" and "Meal Plans"; the super user can also access the page "Add recipe".
 </p>
 
 <p align="center">
-  <img src="final_project/media/images/mealplan_generator.png" /><br>
- Meal plan generation.
+  <img src="final_project/media/images/recipe_as_user.png" width="49%" />
+  <img src="final_project/media/images/recipe_as_superuser.png" width="49%" /><br>
+ Two different recipes shown logged in as a user (on the left) and as a super user (on the right). The super user can approve a recipe that has not been tried yet and can edit the procedure.
+</p>
+
+<p align="center">
+  <img src="final_project/media/images/mealplan_generator.png" width="60%" /><br>
+ Meal plan generation. When "Select Ingredients" is clicked, users can type in the ingredients.
 </p>
 
 ## Distinctiveness and Complexity
-While the project interface of the recipe book has some front-end similarities with the [e-commerce project](https://cs50.harvard.edu/web/projects/2/commerce/) (e.g., filtering items by category and adding them to a watchlist), it introduces several unique features and complexities to differentiate itself:
+While the project interface of the **recipe book** has some front-end similarities with the [e-commerce project](https://cs50.harvard.edu/web/projects/2/commerce/) (e.g., filtering items by category and adding them to a watchlist), it introduces several unique features and complexities to differentiate itself:
 
-1. Infinite scroll: recipes load dynamically as the user scrolls, improving the browsing experience and reducing page load times.
-2. Similar Recipe Recommendations: at the end of each recipe page, the application suggests a maximum of 4 similar recipes based on shared dish labels and the first 4 ingredients. This feature enhances user engagement by helping them discover new recipes.
-3. Portion scaling: users can increase or decrease the portion size of a recipe, and the ingredient quantities are automatically recalculated to maintain the correct proportions.
-4. Ingredient checklist: users can temporarily check off ingredients as they add them, acting as a reminder for what has already been included.
+- Infinite scroll: recipes load dynamically as the user scrolls, improving the browsing experience and reducing page load times.
+- Similar recipe recommendations: at the end of each recipe page, the application suggests a maximum of 4 similar recipes based on shared dish labels and the first 4 ingredients. This feature enhances user engagement by helping them discover new recipes.
+- Portion scaling: users can increase or decrease the portion size of a recipe, and the ingredient quantities are automatically recalculated to maintain the correct proportions.
+- Ingredient checklist: users can temporarily check off ingredients as they add them, acting as a reminder for what has already been included.
 
-Above all, the most distinctive and complex implemented feature is the creation of a balanced **meal plan**, either for a day or a week. The user can:
+Above all, the most distinctive and complex implemented feature is the creation of a balanced **meal plan**, either for a day or a week. In order to generate it, the user can:
 - Choose random generation or
 - Select the ingredients they already have and decide whether to use only them or possibly buy others. To facilitate this procedure, some basic ingredients are already present;
 - Specify a label (vegan, vegetarian, gluten-free);
 - Specify whether they would like to prepare more dinner to have lunch the day after.
 
-In case the user does not chose enough binding ingredients to generated a balanced meal plan, they are warned about it.
+Then, the user is presented with the meal plan:
+- If the ingredients were strictly selected and not enough to generate a balanced meal plan, the user is warned about it;
+- The position of each recipe can be changed by dragging a handle;
+- The user can name the plan;
+- An interactive grocery shopping list is presented, enabling the user to check off ingredients they already have; the list can be saved as a text to export.
+- The meal plan is automatically saved in the "Meal Plans" page accessible on the top right of the webpage, where the user can also delete a plan.
 
-When presented the plan, users can change the position of a meal and name the plan, which will be visible in the "Meal Plans" page accessible on the top right of the webpage.
-
-Then, an interactive grocery shopping list is presented, enabling the user to check off food they already have; the list can be saved as a text to export.
-
-The super user has some extra features. The most important one being the "Add recipe" page on the top right of the webpage (not visible to normal users). To do so, the super user inserts the quantity of each ingredient and selects the unit of measure (grams, ml, teaspoon, tablespoon, pieces or by heart). As per the image, they can either insert a file from their device, or an URL. Lastly, they assign the base number of portions, dish type, label and whether they have already tried the recipe or not. Every recipe can be modified through Django administration, but the procedure and approval of a recipe are also modifiable on each recipe page.
+The super user has some extra features:
+- Add new recipes: through the designated page on the top right of the webpage (not visible to normal users), the super user inserts the quantity of each ingredient and selects the unit of measure (grams, ml, teaspoon, tablespoon, pieces or by heart). As per the image, they can either insert a file from their device, or an URL. Lastly, they assign the base number of portions, dish type, label and whether they have already tried the recipe or not;
+- Every recipe can be modified through Django administration, but for the sake of simplicity the procedure and approval of a recipe are also modifiable on each recipe page.
 
 ### Back-End Complexity
 Although the design may seem similar to previous projects (e.g., search functionality and random page generation), the back-end logic is significantly more complex:
