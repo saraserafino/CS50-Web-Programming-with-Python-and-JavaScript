@@ -55,8 +55,8 @@ Although the design may seem similar to previous projects (e.g., search function
 > [!TIP]
 > To create the data migration file, the specific terminal command was
 > ```bash
-python manage.py makemigrations recipebook --empty --name add_default_dishes_and_labels
-```
+> python manage.py makemigrations recipebook --empty --name add_default_dishes_and_labels
+> ```
 
 ## Technologies Used
 - **Front-End**:
