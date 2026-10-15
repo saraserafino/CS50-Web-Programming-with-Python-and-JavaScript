@@ -52,6 +52,12 @@ Although the design may seem similar to previous projects (e.g., search function
 - **[Custom Template](https://docs.djangoproject.com/en/6.0/howto/custom-template-tags/)**: extended the template engine by defining a custom filter in `templatetags/custom_filters.py` able to [get an item from a dictionary using a dynamic key](https://github.com/2431540349-art/django-py1/blob/main/accounts/templatetags/custom_filters.py). This was required in order to iterate over the key `day` in the dictionary containing the meal plan.
 - **Data Migration**: **[Django Data Migration](https://docs.djangoproject.com/en/6.0/topics/migrations/#data-migrations)** was used to add default values for dishes and labels, ensuring a clean, permanent and version-controlled way to populate the database. Whereas for the ingredients, [Fixtures](https://docs.djangoproject.com/en/6.0/topics/db/fixtures/) are generated loading a JSON file; this method requires manual loading that is automated in the app's setup *(not done yet)*.
 
+> [!TIP]
+> To create the data migration file, the specific terminal command was
+> ```bash
+python manage.py makemigrations recipebook --empty --name add_default_dishes_and_labels
+```
+
 ## Technologies Used
 - **Front-End**:
   - HTML, CSS, JavaScript
