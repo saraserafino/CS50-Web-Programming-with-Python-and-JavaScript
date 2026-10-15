@@ -1,19 +1,19 @@
 # Final project: recipe book & meal plan
 > [!NOTE]
-> Recipe book is finished, meal plan is almost finished, some refinements are in progress.
+> Recipe book is finished, meal plan is almost finished, a small task is in progress but it can be used meanwhile.
 
-This web application is an online recipe book and meal planner, the workings of which are explained on the homepage. The former is designed to help users discover and save recipes, while the latter generates a balanced meal plan based on user's inputs.<br>
+This web application is an online recipe book and meal planner, the workings of which are explained on the homepage. The former is designed to help users discover and save recipes, while the latter generates a balanced meal plan based on users' inputs.<br>
 Users can filter recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
-For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility. Moreover, they can check off the ingredients to track what they have already used. After each recipe, a maximum of four recipes is recommended based on the first four ingredients.
+For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility. Moreover, they can check off the ingredients to track what they have already used. After each recipe, other similar recipes are recommended based on the first four ingredients.
 
 <p align="center">
   <img src="final_project/media/images/homepage.png" /><br>
- Homepage explains recipe book and meal plan generation.
+ Homepage, explaining the recipe book and meal plan generation.
 </p>
 
 <p align="center">
   <img src="final_project/media/images/recipes.png" /><br>
- Recipes page.
+ Recipes page, where users can filter by dish, label and approval status, or search by words.
 </p>
 
 <p align="center">
@@ -86,12 +86,14 @@ The application includes the following models:
 - **`random_recipe`**: randomly shows a single recipe.
 - **`favourites`**: displays the user's saved recipes.
 - **`search`**: search for recipes where the query is contained in the title, procedure or ingredients.
-- **`add_recipe`** and **`edit_recipe`**: only the super user can add new recipes and edit them.
-- **`generate_mealplan`** and **`mealplan_result`**: allow users to create and modify meal plans.
+- **`add_recipe`** and **`edit_recipe`**: only the super user can add new recipes and edit them
+- **`edit_recipe`** and **`toggle_is_new`**: without opening Django administration, the super user can edit a recipe and approve it directly on the recipe page.
+- **`generate_mealplan`**, **`mealplan_result`** and **`save_mealplan`**: allow users to generate, modify and save meal plans. The former function has some helper functions
+- **`user_mealplans`** and **`delete_mealplan`**: users can access to their meal plans and delete them.
 
 ### Static Files
 - **CSS**: custom styles for the application, including responsive design, such as the "copied!" message when the grocery list is copied.
-- **JavaScript**: handles dynamic features like chosen plugin, infinite scroll, portion scaling, ingredient checklists, recipe editing, adding and removing an ingredient when creating a recipe. Particularly in the mealplan application, it shows and hides the ingredient selection field when generating a plan and, most importantly, it allows the user to modify a meal plan by dragging each meal and blocking it for future generation; it also allows the user to copy the grocery list.
+- **JavaScript**: handles dynamic features like chosen plugin, infinite scroll, portion scaling, ingredient checklists, recipe editing, adding and removing an ingredient when creating a recipe. Particularly, in the mealplan application, it shows and hides the ingredient selection field when generating a plan and, most importantly, it allows the user to modify a meal plan by dragging each meal; it also allows the user to copy the grocery list.
 - **Images**: personally uploaded recipe images are stored in the `media` directory, while others are public urls.
 - 
 ## How to run
