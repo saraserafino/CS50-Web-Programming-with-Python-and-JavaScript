@@ -83,21 +83,15 @@ def generate_mealplan(request):
                     recipes = recipes.filter(label__id=label_id)
             recipes = recipes.distinct()
 
-            # Fetch their IDs and shuffle them
-            meals_ids = list(recipes.values_list('id', flat=True))
-            random.shuffle(meals_ids)
+            # Check if recipes is empty
+            if not recipes.exists():
+                messages.error(request, "No recipes match your criteria. Please try different filters.")
+                return render(request, 'mealplan/mealplan_generation.html', {'form': form})
 
             if just_one_day: # Just one lunch and dinner
                 num_meals_to_generate = 2
             else: # if include_leftovers, every dinner is also next day's lunch, except for weekend
                 num_meals_to_generate = 10 if include_leftovers else 14
-
-            # Fetch the selected recipes from the database
-            recipes = Recipe.objects.filter(id__in=meals_ids)
-            # Check if recipes is empty
-            if not recipes.exists():
-                messages.error(request, "No recipes match your criteria. Please try different filters.")
-                return render(request, 'mealplan/mealplan_generation.html', {'form': form})
 
             # Sort every filtered recipe per categories
             category_groups = {k: [] for k in CATEGORY_GROUPS} # CATEGORY_GROUPS.copy() would be a shallow copy
@@ -113,6 +107,9 @@ def generate_mealplan(request):
                 if category_key in category_groups:
                     category_groups[category_key].append(recipe.id)
                     category_groups_original[category_key].append(recipe.id)
+            # Shuffle each pool to randomise the picks
+            for pool in category_groups.values():
+                random.shuffle(pool)
             # Check if all required categories are covered, for a balanced mealplan
             if covered_categories < REQUIRED_CATEGORIES:
                 messages.warning(request,
@@ -202,7 +199,7 @@ def generate_mealplan(request):
                                 meal_dict[day_name]['lunch'].append(picked)
 
                         if category_groups['protein+vegetables'] and random.choice([True,False]):
-                            meal_dict[day_name]['dinner'].append(pick_from(category_groups['protein+vegetables'],category_groups_original['carbohydrate+vegetables']))
+                            meal_dict[day_name]['dinner'].append(pick_from(category_groups['protein+vegetables'],category_groups_original['protein+vegetables']))
                         else:
                             picked = pick_from(category_groups['protein'],category_groups_original['protein'])
                             if picked:
@@ -239,10 +236,16 @@ def generate_mealplan(request):
 
     return render(request, 'mealplan/mealplan_generation.html', {'form': form})
 
+def is_mealplan_owner(request, meal_plan):
+    """Check if the meal plan belongs to the logged-in user or, for anonymous users, to their session."""
+    if request.user.is_authenticated:
+        return meal_plan.user == request.user
+    return meal_plan.session_key == request.session.session_key
+
 def mealplan_result(request, meal_plan_id):
     meal_plan = get_object_or_404(MealPlan, id=meal_plan_id)
-    # Determine if it is a single-day or weekly
-    just_one_day = meal_plan.meal_plan_recipes.count() == 2
+    # Determine if it is a single-day or a week
+    just_one_day = meal_plan.is_daily
     # Reconstruct meal_dict
     meal_dict = {'Today': {'lunch': [], 'dinner': []}} if just_one_day else {
                 'Monday': {'lunch': [], 'dinner': []},
@@ -257,18 +260,13 @@ def mealplan_result(request, meal_plan_id):
         recipe = meal_plan_recipe.recipe
         # drag_meals.js needs the MealPlanRecipe id (not the Recipe id) to save the new positions
         recipe.mpr_id = meal_plan_recipe.id
-        day = 'Today' if just_one_day else meal_plan_recipe.day
-        meal_dict[day][meal_plan_recipe.meal_type].append(recipe)
+        recipe.is_blocked = meal_plan_recipe.is_blocked
+        meal_dict[meal_plan_recipe.day][meal_plan_recipe.meal_type].append(recipe)
 
     # Check if the meal plan belongs to the user or their session
-    if request.user.is_authenticated:
-        if meal_plan.user != request.user:
-            messages.error(request, "You do not have permission to view this meal plan.")
-            return redirect('mealplan_home')
-    else:
-        if meal_plan.session_key != request.session.session_key:
-            messages.error(request, "You do not have permission to view this meal plan.")
-            return redirect('mealplan_home')
+    if not is_mealplan_owner(request, meal_plan):
+        messages.error(request, "You do not have permission to view this meal plan.")
+        return redirect('mealplan_home')
 
     # Get the grocery list (all ingredients for the meal plan's recipes)
     ingredient_dict = defaultdict(lambda: {'quantity': 0, 'unit': ''})
@@ -309,11 +307,7 @@ def update_positions(request):
     order_data = data.get('order_data', [])
 
     # Only the owner (user or anonymous session) can reorder the meal plan
-    if request.user.is_authenticated:
-        is_owner = meal_plan.user == request.user
-    else:
-        is_owner = meal_plan.session_key == request.session.session_key
-    if not is_owner:
+    if not is_mealplan_owner(request, meal_plan):
         return JsonResponse({'success': False}, status=403)
 
     # Save position, day and meal type, since mealplan_result places each card using day and meal_type
@@ -323,6 +317,22 @@ def update_positions(request):
             day=item['day'],
             meal_type=item['meal_type'],
         )
+
+    return JsonResponse({'success': True})
+
+def toggle_lock(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False}, status=400)
+
+    data = json.loads(request.body)
+    meal_plan_recipe = get_object_or_404(MealPlanRecipe, id=data.get('meal_plan_recipe_id'))
+
+    # Only the owner (user or anonymous session) can lock/unlock a recipe
+    if not is_mealplan_owner(request, meal_plan_recipe.meal_plan):
+        return JsonResponse({'success': False}, status=403)
+
+    meal_plan_recipe.is_blocked = bool(data.get('is_blocked'))
+    meal_plan_recipe.save()
 
     return JsonResponse({'success': True})
 

@@ -94,6 +94,7 @@
 }
 .locked .drag-handle {
   cursor: not-allowed !important;
+  opacity: 0.5;
 }
 
 /* Iconify design from https://icon-sets.iconify.design */

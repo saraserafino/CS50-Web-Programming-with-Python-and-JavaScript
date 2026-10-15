@@ -16,6 +16,11 @@ class MealPlan(models.Model):
 
     name = models.CharField(max_length=50, default="Meal Plan")
 
+    @property
+    def is_daily(self):
+        """A single-day plan stores its recipes under 'Today' (it can have 2 to 4 recipes, so counting them is not reliable)."""
+        return self.meal_plan_recipes.filter(day='Today').exists()
+
     def __str__(self):
         return f"Meal Plan {self.id} (User: {self.user}, Session: {self.session_key}) created at {self.created_at}"
 

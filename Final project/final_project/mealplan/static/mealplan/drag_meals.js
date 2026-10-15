@@ -4,8 +4,11 @@ document.querySelectorAll('.sortable-card').forEach(sortableCard => {
         animation: 350,
         handle: ".drag-handle",
         swap: true, // enable swapping instead of sorting
-        filter: '.locked', // ignore locked cards
+        filter: '.locked', // locked cards cannot be dragged
+        preventOnFilter: false, // still allow clicks/taps (e.g. on the lock icon) inside locked cards
         group: "card-meal",
+        // Other cards cannot be swapped onto a locked card either
+        onMove: evt => !evt.related.classList.contains('locked'),
         onEnd: function() {
             // Read every card in page order, with the day and meal of the slot it now sits in
             const orderData = [];
@@ -53,23 +56,31 @@ document.addEventListener('DOMContentLoaded', function () {
         lockHandle.addEventListener('click', function (e) {
             e.stopPropagation();
             var cardBody = this.closest('.card-body');
-            var cardWrap = cardBody.closest('.sortable-card');
-            var dragHandle = cardBody.querySelector('.drag-handle');
+            var isLocked = cardBody.classList.toggle('locked');
+            this.classList.toggle('circum--lock', isLocked);
+            this.classList.toggle('circum--unlock', !isLocked);
 
-            // Toggle lock state
-            if (this.classList.contains('circum--unlock')) {
-                this.classList.remove('circum--unlock');
-                this.classList.add('circum--lock');
-                cardWrap.classList.add('locked');
-                dragHandle.style.cursor = 'not-allowed';
-                dragHandle.style.opacity = '0.5';
-            } else {
-                this.classList.remove('circum--lock');
-                this.classList.add('circum--unlock');
-                cardWrap.classList.remove('locked');
-                dragHandle.style.cursor = 'move';
-                dragHandle.style.opacity = '1';
-            }
+            // Save the lock state, so it is kept
+            fetch('/mealplan/toggle_lock/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    meal_plan_recipe_id: cardBody.dataset.id,
+                    is_blocked: isLocked
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Failed to save lock state');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         });
     });
 });
