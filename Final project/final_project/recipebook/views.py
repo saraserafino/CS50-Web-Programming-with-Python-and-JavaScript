@@ -300,9 +300,9 @@ def toggle_is_new(request, recipe_id):
     if request.method == "POST":
         try:
             recipe = Recipe.objects.get(pk=recipe_id)
+            recipe.is_new = not recipe.is_new
+            recipe.save(update_fields=["is_new"])
+            return redirect('recipes', id=recipe.id)
+
         except Recipe.DoesNotExist:
             return JsonResponse({"success": False, "error": "Recipe not found."}, status=404)
-    recipe.is_new = not recipe.is_new
-    recipe.save(update_fields=["is_new"])
-
-    return redirect('recipes', id=recipe.id)
