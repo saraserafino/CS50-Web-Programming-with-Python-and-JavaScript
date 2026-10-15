@@ -118,7 +118,7 @@ def add_recipe(request):
             "ingredients": all_ingredients
         })
     else: # == "POST"
-        # Get data from the form in bookrecipe/add_recipe.html
+        # Get data from the form in recipebook/add_recipe.html
         title = request.POST["title"]
         procedure = request.POST["procedure"]
         is_new = request.POST.get("is_new", False) == "on"
