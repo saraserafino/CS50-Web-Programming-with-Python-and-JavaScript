@@ -1,5 +1,5 @@
 # Final project: recipe book & meal plan
-This web application is an online recipe book and meal planner, the workings of which are explained on the homepage. The former is designed to help users discover and save recipes, while the latter generates a balanced meal plan based on user's inputs.<br>
+This web application is an online recipe book and meal planner, the workings of which are explained on the homepage and fully shown in this [video](https://youtu.be/jqzvVMt_5Kw). The former is designed to help users discover and save recipes, while the latter generates a balanced meal plan based on user's inputs.<br>
 Users can filter recipes by dish type (protein, carbohydrate, vegetables, dessert, sauce), dietary label (vegan, vegetarian, gluten-free) and approval status (whether the recipe has been approved by the super user or not). Additionally, users can search for recipes based on title, ingredients, or procedure.<br>
 For every recipe, users can adjust the portion size, and the ingredient quantities will automatically scale accordingly, allowing for meal planning and cooking flexibility. Moreover, they can check off the ingredients to track what they have already used. After each recipe, other similar recipes are recommended.
 
