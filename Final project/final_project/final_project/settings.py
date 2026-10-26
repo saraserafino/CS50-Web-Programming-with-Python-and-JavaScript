@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-+l_1lr8d@dy3g9a&76eebii%1*h+w(h6a5r765!r42l%k#s5i6"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["prociona.pythonanywhere.com"]
 
 
 # Application definition
@@ -123,3 +123,4 @@ STATIC_URL = "static/"
 # Handle media files by defining the server-side file path and providing a browser-accessible URL
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
